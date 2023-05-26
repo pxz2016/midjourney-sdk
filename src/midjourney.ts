@@ -1,72 +1,88 @@
-import { DiscordRequest } from './utils'
-import { MidJourneyOptions, BaiDuTranslateConfig } from './types'
+import DiscordRequest from './http'
+import {
+  MidJourneyOptions,
+  BaiDuTranslateConfig,
+  ChannelType,
+  Translate
+} from './types'
 import crypto from 'crypto-js'
-import { Client, GatewayIntentBits, Message } from 'discord.js'
-
+import { Message } from 'discord.js'
 export class MidJourney {
   private request: DiscordRequest
-  private _discord: Client
   private guild_id: string
   private session_id: string
-  private baiduConfig?: BaiDuTranslateConfig
+  private channel_id?: string
+  private baiduTranslate?: BaiDuTranslateConfig
 
   constructor(options: MidJourneyOptions) {
-    this.guild_id = options.guild_id
-    this.session_id = options.session_id
-    options.baiduTranslate && (this.baiduConfig = options.baiduTranslate)
-    this.request = new DiscordRequest(options.userToken)
-    this._discord = new Client(
-      Object.assign(
-        {
-          intents: [
-            GatewayIntentBits.Guilds,
-            GatewayIntentBits.MessageContent,
-            GatewayIntentBits.GuildMessages
-          ]
-        },
-        options.discordConfig
-      )
-    )
-    this._discord.login(options.botToken)
-  }
-
-  get discord() {
-    return this._discord
+    let { guild_id, session_id, channel_id, baiduTranslate, token, version } =
+      options
+    if (!guild_id) throw new Error('guild_id is required')
+    if (!session_id) throw new Error('session_id is required')
+    this.guild_id = guild_id
+    this.session_id = session_id
+    this.channel_id = channel_id
+    this.baiduTranslate = baiduTranslate
+    this.request = new DiscordRequest(token, version)
   }
 
   /**
    * create guild channel
-   * @param name channel name
-   * @param parent_id guild category id
-   * @returns
+   * @param {string} name channel name
+   * @param {string} parent_id guild category id
+   * @returns {ChannelType} channel info
    */
   createGuildChannel(name: string, parent_id: string) {
-    return this.request.post(
-      `https://discord.com/api/v9/guilds/${this.guild_id}/channels`,
-      {
-        type: 0,
-        name,
-        permission_overwrites: [],
-        parent_id
-      }
+    return this.request.post<ChannelType>(`/guilds/${this.guild_id}/channels`, {
+      type: 0,
+      name,
+      parent_id
+    })
+  }
+
+  /**
+   * get guild all channels
+   * @returns {ChannelType[]} Array of Channel info
+   */
+  getGuildChannels() {
+    return this.request.get<ChannelType[]>(`/guilds/${this.guild_id}/channels`)
+  }
+
+  /**
+   * get channel messages width limit by channel_id
+   * @param {string} channel_id which channel to get (default on constructor what you set)
+   * @param {number} limit messages limit num (default 50)
+   * @returns {Message[]} Array of Message
+   */
+  getChannelMessages(channel_id = this.channel_id, limit = 50) {
+    if (!channel_id) throw new Error('channel_id is empty')
+    return this.request.get<Message[]>(
+      `/channels/${channel_id}/messages?limit=${limit}`
     )
   }
 
   /**
    * send imagine Prompt
-   * @param value
-   * @param translate prompt translate from en to zh
-   * @returns
+   * @param {string} value what prompt you want to send
+   * @param {boolean} translate prompt translate from en to zh
+   * @param {string} channel_id which channel to send (default on constructor what you set)
+   * @returns {null} no return
    */
-  async sendPrompt(value: string, translate: boolean = false) {
+  async prompt(value: string, translate = false, channel_id = this.channel_id) {
+    if (!channel_id) throw new Error('channel_id is empty')
     if (translate) {
-      value = await this.translate(value).then((res) => res.trans_result[0].dst)
+      const regex = /--(\w+)\s+([^-\s]+)/g
+      const matches = value.match(regex) ?? []
+      value = await this.translate(value.replace(regex, '').trim()).then(
+        (res) => res.trans_result[0].dst.concat(` ${matches.join(' ')}`)
+      )
     }
-    return this.request.post('/api/v9/interactions', {
+    return this.request.post('/interactions', {
       type: 2,
       application_id: '936929561302675456',
       session_id: this.session_id,
       guild_id: this.guild_id,
+      channel_id,
       data: {
         version: '1077969938624553050',
         id: '938956540159881230',
@@ -104,19 +120,43 @@ export class MidJourney {
     })
   }
 
-  translate(text: string) {
-    if (!this.baiduConfig)
-      throw new Error('Please Configuration baidutranslateConfig')
-    const { appid, secret } = this.baiduConfig
+  /**
+   * exec a discord's component action
+   * @param {string} message_id message id
+   * @param {string} custom_id component id
+   * @param {string} channel_id which channel to send (default on constructor what you set){string}
+   * @returns no return
+   */
+  action(message_id: string, custom_id: string, channel_id = this.channel_id) {
+    if (!channel_id) throw new Error('channel_id is empty')
+    return this.request.post('/interactions', {
+      type: 3,
+      message_id,
+      application_id: '936929561302675456',
+      session_id: this.session_id,
+      guild_id: this.guild_id,
+      channel_id,
+      data: {
+        component_type: 2,
+        custom_id
+      }
+    })
+  }
+
+  /**
+   * translate text to en
+   * @param {string} text translate text
+   * @param {string} from be translate language
+   * @returns {Translate} translate result
+   */
+  translate(text: string, from = 'zh') {
+    if (!this.baiduTranslate) throw new Error('baiduTranslate is not config')
+    const { appid, secret } = this.baiduTranslate
     let salt = Date.now()
     let str = `${appid}${text}${salt}${secret}`
     let sign = crypto.MD5(str)
-    return this.request.get<{
-      from: string
-      to: string
-      trans_result: { src: string; dst: string }[]
-    }>(
-      `http://api.fanyi.baidu.com/api/trans/vip/translate?q=${text}&from=zh&to=en&appid=${appid}&salt=${salt}&sign=${sign}`
+    return this.request.get<Translate>(
+      `http://api.fanyi.baidu.com/api/trans/vip/translate?q=${text}&from=${from}&to=en&appid=${appid}&salt=${salt}&sign=${sign}`
     )
   }
 }

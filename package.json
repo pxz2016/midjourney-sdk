@@ -1,21 +1,31 @@
 {
   "name": "midjourney-sdk",
-  "version": "1.0.0",
-  "description": "",
+  "version": "1.0.1",
+  "description": "Node SDK for the unofficial MidJourney.",
+  "packageManager": "pnpm@7.18.2",
   "type": "module",
   "main": "dist/index.cjs",
   "types": "dist/index.d.ts",
   "module": "dist/index.js",
+  "keywords": [
+    "midjourney",
+    "midjourney-api",
+    "midjourney-sdk"
+  ],
+  "author": "LaiBaoYuan",
+  "license": "MIT",
+  "homepage": "https://github.com/LaiBaoYuan/midjourney-sdk/#readme",
+  "bugs": {
+    "url": "https://github.com/LaiBaoYuan/midjourney-sdk/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LaiBaoYuan/midjourney-sdk.git"
+  },
   "scripts": {
     "build": "tsc --noEmit && rollup --config rollup.config.ts --configPlugin esbuild",
     "format": "prettier --check --write ."
   },
-  "keywords": [
-    "midjourney",
-    "midjourney-api"
-  ],
-  "author": "LaiBaoYuan",
-  "license": "ISC",
   "dependencies": {
     "axios": "^1.4.0",
     "crypto-js": "^4.1.1",
@@ -31,10 +41,20 @@
     "@types/crypto-js": "^4.1.1",
     "@types/node": "^20.2.4",
     "esbuild": "^0.17.19",
+    "lint-staged": "^13.2.2",
     "prettier": "^2.8.8",
     "rollup": "^3.23.0",
     "rollup-plugin-dts": "^5.3.0",
     "rollup-plugin-esbuild": "^5.0.0",
+    "simple-git-hooks": "^2.8.1",
     "typescript": "^5.0.4"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "pnpm lint-staged"
+  },
+  "lint-staged": {
+    "*": [
+      "prettier --write --ignore-unknown"
+    ]
   }
 }

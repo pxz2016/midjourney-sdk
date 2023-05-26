@@ -1,10 +1,10 @@
 import axios, { type AxiosRequestConfig, AxiosInstance } from 'axios'
 
-export class DiscordRequest {
+export default class DiscordRequest {
   private _http: AxiosInstance
-  constructor(token: string) {
+  constructor(token: string, version = 10) {
     this._http = axios.create({
-      baseURL: 'https://discord.com',
+      baseURL: `https://discord.com/api/v${version}`,
       timeout: 30000,
       headers: {
         Authorization: token
