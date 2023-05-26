@@ -16,9 +16,10 @@ export class MidJourney {
 
   constructor(options: MidJourneyOptions) {
     let { guild_id, session_id, channel_id, baiduTranslate, token, version } =
-      options
+      options || {}
     if (!guild_id) throw new Error('guild_id is required')
     if (!session_id) throw new Error('session_id is required')
+    if (!token) throw new Error('token is required')
     this.guild_id = guild_id
     this.session_id = session_id
     this.channel_id = channel_id

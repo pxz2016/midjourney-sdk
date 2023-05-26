@@ -24,7 +24,8 @@
   },
   "scripts": {
     "build": "tsc --noEmit && rollup --config rollup.config.ts --configPlugin esbuild",
-    "format": "prettier --check --write ."
+    "format": "prettier --check --write .",
+    "test": "vitest"
   },
   "dependencies": {
     "axios": "^1.4.0",
@@ -47,7 +48,8 @@
     "rollup-plugin-dts": "^5.3.0",
     "rollup-plugin-esbuild": "^5.0.0",
     "simple-git-hooks": "^2.8.1",
-    "typescript": "^5.0.4"
+    "typescript": "^5.0.4",
+    "vitest": "^0.31.1"
   },
   "simple-git-hooks": {
     "pre-commit": "pnpm lint-staged"
