@@ -9,6 +9,12 @@ Node.js SDK for the unofficial MidJourney API.
 - Exec a ButtonComponent action by calling the `action` method. you can get the CustomId in the discord bot Listen Event `messageCreate` callback with `discord.js`
 - 支持中文翻译，要在构造函数中填写appid和secret，prompt的参数不会被翻译。
 
+## Effect
+![](https://files.mdnice.com/user/36542/da198568-34d4-4366-95af-762ea8d71917.png)
+![](https://files.mdnice.com/user/36542/e7ef33a7-2f22-4582-b4a9-73d58db74e1e.png)
+![](https://files.mdnice.com/user/36542/764f1afd-020c-49ff-846a-2418ee1724d4.png)
+![](https://files.mdnice.com/user/36542/89fb0c36-cd76-49be-a82a-98b574234a20.png)
+
 ## Install
 
 npm
@@ -120,3 +126,5 @@ const mj = new MidJourney({
   - `custom_id`: component id
   - `channel_id` (optional): which channel to send (default on constructor what you set){string}
   - return null
+ 
+
