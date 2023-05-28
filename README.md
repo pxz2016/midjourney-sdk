@@ -34,6 +34,11 @@ const mj = new MidJourney({
 })
 ```
 
+## how can I get the session_id/guild_id/token
+![](https://files.mdnice.com/user/36542/db42f1c9-b22f-4a72-bc9e-3f4e28c2de8c.png)
+![](https://files.mdnice.com/user/36542/a7533387-c895-45eb-b3bb-a8cccc4a9762.png)
+![](https://files.mdnice.com/user/36542/fbb01401-5a96-47c3-a3e8-66eee2dedace.png)
+
 ## 接口说明文档
 
 ## MidJourneyOptions
