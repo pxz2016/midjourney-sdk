@@ -120,9 +120,3 @@ const mj = new MidJourney({
   - `custom_id`: component id
   - `channel_id` (optional): which channel to send (default on constructor what you set){string}
   - return null
-
-- `translate(text: string, from?: string): Promise<Translate>`
-  - 将文本翻译为英文
-  - `text`: 要翻译的文本
-  - `from` (可选): 翻译源语言
-  - 返回 Promise，解析为 Translate 对象

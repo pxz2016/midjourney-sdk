@@ -74,7 +74,7 @@ export class MidJourney {
     if (translate) {
       const regex = /--(\w+)\s+([^-\s]+)/g
       const matches = value.match(regex) ?? []
-      value = await this.translate(value.replace(regex, '').trim()).then(
+      value = await this.#translate(value.replace(regex, '').trim()).then(
         (res) => res.trans_result[0].dst.concat(` ${matches.join(' ')}`)
       )
     }
@@ -150,7 +150,7 @@ export class MidJourney {
    * @param {string} from be translate language
    * @returns {Translate} translate result
    */
-  translate(text: string, from = 'zh') {
+  #translate(text: string, from = 'zh') {
     if (!this.baiduTranslate) throw new Error('baiduTranslate is not config')
     const { appid, secret } = this.baiduTranslate
     let salt = Date.now()
