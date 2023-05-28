@@ -1,4 +1,4 @@
-# midjourney-api <a href="https://www.npmjs.com/package/midjourney-sdk"><img src="https://img.shields.io/npm/v/midjourney-sdk.svg?maxAge=3600" alt="npm version" /></a>
+# midjourney-sdk <a href="https://www.npmjs.com/package/midjourney-sdk"><img src="https://img.shields.io/npm/v/midjourney-sdk.svg?maxAge=3600" alt="npm version" /></a>
 
 Node.js SDK for the unofficial MidJourney API.
 
@@ -30,7 +30,7 @@ const mj = new MidJourney({
   session_id: 'xxxxx',
   guild_id: 'xxxxx',
   token: 'xxxxx'
-  // channel_id: 'xxxxx'
+  channel_id: 'xxxxx' // the class methods will get this value by default if you set
 })
 ```
 
@@ -39,80 +39,80 @@ const mj = new MidJourney({
 ![](https://files.mdnice.com/user/36542/a7533387-c895-45eb-b3bb-a8cccc4a9762.png)
 ![](https://files.mdnice.com/user/36542/fbb01401-5a96-47c3-a3e8-66eee2dedace.png)
 
-## 接口说明文档
+## Interface document
 
 ## MidJourneyOptions
 
-- `token`: Discord 用户令牌
-- `guild_id`: Discord 服务器 ID
-- `session_id`: 会话 ID
-- `channel_id` (可选): 频道 ID
-- `baiduTranslate` (可选): 百度翻译配置
-  - `appid`: 应用程序 ID
-  - `secret`: 密钥
-- `version` (可选): 版本号 (10 或 9)
+- `token`: Discord user Token
+- `guild_id`: Discord server ID
+- `session_id`: Session ID
+- `channel_id` (optional): Channel ID
+- `baiduTranslate` (optional): baiduTranslate config
+  - `appid`:  appid
+  - `secret`: secret
+- `version` (optional): Discord api version code (10 or 9)
 
 ## ChannelType
 
-- `id`: 频道 ID
-- `name`: 频道名称
-- `parent_id`: 服务器分类 ID
-- `type`: 频道类型
-- `last_message_id`: 最后一条消息 ID
-- `guild_id`: 服务器 ID
-- `flags`: 标志
-- 其他自定义属性...
+- `id`: Channel ID
+- `name`: Channel Name
+- `parent_id`: Category ID
+- `type`: channel type
+- `last_message_id`: last message ID
+- `guild_id`: guild ID
+- `flags`: flags
+- other props...
 
 ## Translate
 
-- `from`: 翻译源语言
-- `to`: 翻译目标语言
-- `trans_result`: 翻译结果数组
-  - `src`: 原文
-  - `dst`: 译文
+- `from`: source lang
+- `to`: target lang
+- `trans_result`: 
+  - `src`: source
+  - `dst`: result
 
 ## MidJourney
 
-### 构造函数
+### Constructor
 
-- `options`: MidJourneyOptions 对象
+- `options`: MidJourneyOptions
 
-### 方法
+### Methods
 
 - `createGuildChannel(name: string, parent_id: string): Promise<ChannelType>`
 
-  - 创建服务器频道
-  - `name`: 频道名称
-  - `parent_id`: 服务器分类 ID
-  - 返回 Promise，解析为 ChannelType 对象
+  - create guild channel
+  - `name`: channel name
+  - `parent_id`: guild category id
+  - return `Promise<ChannelType>`
 
 - `getGuildChannels(): Promise<ChannelType[]>`
 
-  - 获取服务器的所有频道
-  - 返回 Promise，解析为 ChannelType 对象数组
+  - get guild all channels
+  - return `Promise<ChannelType[]>`
 
 - `getChannelMessages(channel_id?: string, limit?: number): Promise<Message<boolean>[]>`
 
-  - 获取指定频道的消息（默认为构造函数中设置的频道）
-  - `channel_id` (可选): 频道 ID
-  - `limit` (可选): 消息数量限制（默认为 50）
-  - 返回 Promise，解析为 Message 对象数组
+  - get channel messages width limit by channel_id
+  - `channel_id` (optional): channel_id which channel to get (default on constructor what you set)
+  - `limit` (optional): limit messages limit num (default 50)
+  - return `Promise<Message<boolean>[]>`
 
 - `prompt(value: string, translate?: boolean, channel_id?: string): Promise<any>`
 
-  - 发送想象中的提示
-  - `value`: 要发送的提示内容
-  - `translate` (可选): 是否将提示从英文翻译为中文
-  - `channel_id` (可选): 频道 ID（默认为构造函数中设置的频道）
-  - 返回 Promise，解析为任意类型
+  - send imagine Prompt
+  - `value`: value what prompt you want to send
+  - `translate` (optional): translate prompt translate from en to zh
+  - `channel_id` (optional): which channel to send (default on constructor what you set)
+  - return null
 
 - `action(message_id: string, custom_id: string, channel_id?: string): Promise<any>`
 
-  - 执行 Discord 组件的操作
-  - `message_id`: 消息 ID
-  - `custom_id`: 组件 ID
-  - `channel_id` (可选): 频道 ID（默认为构造函数中设置的频道）
-  - 返回 Promise，解析为任意类型
+  - exec a discord's component action
+  - `message_id`: message id
+  - `custom_id`: component id
+  - `channel_id` (optional): which channel to send (default on constructor what you set){string}
+  - return null
 
 - `translate(text: string, from?: string): Promise<Translate>`
   - 将文本翻译为英文
