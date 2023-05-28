@@ -2,6 +2,13 @@
 
 Node.js SDK for the unofficial MidJourney API.
 
+## fetures
+- Create different channels on the same guild based on user IDs by invoke `createGuildChannel` method.
+- According to channel_id to get channelMessage
+- Send prompt to Midjournal by calling the `prompt` method.
+- Exec a ButtonComponent action by calling the `action` method. you can get the CustomId in the discord bot Listen Event `messageCreate` callback with `discord.js`
+- 支持中文翻译，要在构造函数中填写appid和secret，prompt的参数不会被翻译。
+
 ## Install
 
 npm
@@ -29,7 +36,7 @@ import { MidJourney } from 'midjourney-sdk'
 const mj = new MidJourney({
   session_id: 'xxxxx',
   guild_id: 'xxxxx',
-  token: 'xxxxx'
+  token: 'xxxxx',
   channel_id: 'xxxxx' // the class methods will get this value by default if you set
 })
 ```
