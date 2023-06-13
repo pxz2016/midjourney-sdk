@@ -1,6 +1,6 @@
 {
   "name": "midjourney-sdk",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Node SDK for the unofficial MidJourney.",
   "packageManager": "pnpm@7.18.2",
   "type": "module",
