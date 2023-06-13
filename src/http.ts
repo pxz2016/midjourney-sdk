@@ -12,7 +12,7 @@ export default class DiscordRequest {
     })
     this._http.interceptors.response.use(
       (res) => res.data,
-      (error) => Promise.reject(error.response.data || error.message)
+      (error) => Promise.reject(error.response?.data || error.message)
     )
   }
 
