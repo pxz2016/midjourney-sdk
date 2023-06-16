@@ -85,7 +85,7 @@ export class MidJourney {
       guild_id: this.guild_id,
       channel_id,
       data: {
-        version: '1077969938624553050',
+        version: '1118961510123847772',
         id: '938956540159881230',
         name: 'imagine',
         type: 1,
@@ -99,14 +99,14 @@ export class MidJourney {
         application_command: {
           id: '938956540159881230',
           application_id: '936929561302675456',
-          version: '1077969938624553050',
+          version: '1118961510123847772',
           default_member_permissions: null,
           type: 1,
           nsfw: false,
           name: 'imagine',
           description: 'Create images with Midjourney',
           dm_permission: true,
-          contexts: null,
+          contexts: [0, 1, 2],
           options: [
             {
               type: 3,
