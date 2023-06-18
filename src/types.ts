@@ -10,7 +10,15 @@ export interface MidJourneyOptions {
   session_id: string
   channel_id?: string
   baiduTranslate?: BaiDuTranslateConfig
+  /**
+   * discord api version
+   */
   version?: 10 | 9
+  /**
+   * midjourney command version
+   * @default '1118961510123847772'
+   */
+  mj_version?: string
 }
 
 export interface BaiDuTranslateConfig {

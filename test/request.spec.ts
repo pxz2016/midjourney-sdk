@@ -1,6 +1,6 @@
 import { MidJourney } from '../src'
 
-describe('request', () => {
+describe('request', async () => {
   it('new Instance widthout token', () => {
     expect(
       () =>

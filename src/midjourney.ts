@@ -12,11 +12,19 @@ export class MidJourney {
   private guild_id: string
   private session_id: string
   private channel_id?: string
+  private mj_version: string = '1118961510123847772'
   private baiduTranslate?: BaiDuTranslateConfig
 
   constructor(options: MidJourneyOptions) {
-    let { guild_id, session_id, channel_id, baiduTranslate, token, version } =
-      options || {}
+    let {
+      guild_id,
+      session_id,
+      channel_id,
+      baiduTranslate,
+      token,
+      version,
+      mj_version
+    } = options || {}
     if (!guild_id) throw new Error('guild_id is required')
     if (!session_id) throw new Error('session_id is required')
     if (!token) throw new Error('token is required')
@@ -24,6 +32,7 @@ export class MidJourney {
     this.session_id = session_id
     this.channel_id = channel_id
     this.baiduTranslate = baiduTranslate
+    mj_version && (this.mj_version = mj_version)
     this.request = new DiscordRequest(token, version)
   }
 
@@ -72,10 +81,19 @@ export class MidJourney {
   async prompt(value: string, translate = false, channel_id = this.channel_id) {
     if (!channel_id) throw new Error('channel_id is empty')
     if (translate) {
-      const regex = /--(\w+)\s+([^-\s]+)/g
-      const matches = value.match(regex) ?? []
-      value = await this.#translate(value.replace(regex, '').trim()).then(
-        (res) => res.trans_result[0].dst.concat(` ${matches.join(' ')}`)
+      // filter system params e.g. --ar 16:9 --q 5
+      const PARAMS_RE = /--(\w+)\s+([^-\s]+)/g
+      // filter website url
+      const URL_RE = /^((http[s]?|ftp):\/\/[^\s/$.?#].[^\s]*)\s/
+      const url = value.match(URL_RE) ? value.match(URL_RE)![1] : []
+      const params_matches = value.match(PARAMS_RE) ?? []
+      value = await this.#translate(
+        value.replace(PARAMS_RE, '').replace(URL_RE, '').trim()
+      ).then(
+        (res) =>
+          `${url ? `${url} ` : ''}${res.trans_result[0].dst.concat(
+            ` ${params_matches.join(' ')}`
+          )}`
       )
     }
     return this.request.post('/interactions', {
@@ -85,7 +103,7 @@ export class MidJourney {
       guild_id: this.guild_id,
       channel_id,
       data: {
-        version: '1118961510123847772',
+        version: this.mj_version,
         id: '938956540159881230',
         name: 'imagine',
         type: 1,
@@ -99,7 +117,7 @@ export class MidJourney {
         application_command: {
           id: '938956540159881230',
           application_id: '936929561302675456',
-          version: '1118961510123847772',
+          version: this.mj_version,
           default_member_permissions: null,
           type: 1,
           nsfw: false,
@@ -157,7 +175,9 @@ export class MidJourney {
     let str = `${appid}${text}${salt}${secret}`
     let sign = crypto.MD5(str)
     return this.request.get<Translate>(
-      `http://api.fanyi.baidu.com/api/trans/vip/translate?q=${text}&from=${from}&to=en&appid=${appid}&salt=${salt}&sign=${sign}`
+      `http://api.fanyi.baidu.com/api/trans/vip/translate?q=${encodeURIComponent(
+        text
+      )}&from=${from}&to=en&appid=${appid}&salt=${salt}&sign=${sign}`
     )
   }
 }
