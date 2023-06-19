@@ -1,6 +1,6 @@
 {
   "name": "midjourney-sdk",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "Node SDK for the unofficial MidJourney.",
   "packageManager": "pnpm@7.18.2",
   "type": "module",
@@ -26,7 +26,7 @@
     "build": "tsc --noEmit && rollup --config rollup.config.ts --configPlugin esbuild",
     "format": "prettier --check --write .",
     "test": "vitest",
-    "example": "node example"
+    "example": "pnpm build && node example"
   },
   "dependencies": {
     "axios": "^1.4.0",

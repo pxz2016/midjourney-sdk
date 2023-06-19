@@ -1,4 +1,4 @@
-import { MidJourney } from '../dist/index.cjs'
+import { MidJourney } from '../dist/index.js'
 import { Client, GatewayIntentBits } from 'discord.js'
 import { ProxyAgent } from 'undici'
 import Express from 'express'

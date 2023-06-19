@@ -3,7 +3,8 @@ import {
   MidJourneyOptions,
   BaiDuTranslateConfig,
   ChannelType,
-  Translate
+  Translate,
+  IPrompt
 } from './types'
 import crypto from 'crypto-js'
 import { Message } from 'discord.js'
@@ -73,28 +74,22 @@ export class MidJourney {
 
   /**
    * send imagine Prompt
-   * @param {string} value what prompt you want to send
-   * @param {boolean} translate prompt translate from en to zh
-   * @param {string} channel_id which channel to send (default on constructor what you set)
+   * @param {IPrompt} options
    * @returns {null} no return
    */
-  async prompt(value: string, translate = false, channel_id = this.channel_id) {
+  async prompt({ value, channel_id = this.channel_id, translate }: IPrompt) {
     if (!channel_id) throw new Error('channel_id is empty')
     if (translate) {
       // filter system params e.g. --ar 16:9 --q 5
       const PARAMS_RE = /--(\w+)\s+([^-\s]+)/g
-      // filter website url
-      const URL_RE = /^((http[s]?|ftp):\/\/[^\s/$.?#].[^\s]*)\s/
-      const url = value.match(URL_RE) ? value.match(URL_RE)![1] : []
       const params_matches = value.match(PARAMS_RE) ?? []
-      value = await this.#translate(
-        value.replace(PARAMS_RE, '').replace(URL_RE, '').trim()
-      ).then(
+      value = await this.#translate(value.replace(PARAMS_RE, '').trim()).then(
         (res) =>
-          `${url ? `${url} ` : ''}${res.trans_result[0].dst.concat(
-            ` ${params_matches.join(' ')}`
+          `${res.trans_result[0].dst.concat(
+            params_matches.length ? ` ${params_matches.join(' ')}` : ''
           )}`
       )
+      value = translate(value)
     }
     return this.request.post('/interactions', {
       type: 2,

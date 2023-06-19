@@ -48,3 +48,18 @@ export interface Translate {
   to: string
   trans_result: { src: string; dst: string }[]
 }
+
+export interface IPrompt {
+  /**
+   * value what prompt you want to send
+   */
+  value: string
+  /**
+   * translate prompt translate from en to zh
+   */
+  translate?: (val: string) => string
+  /**
+   * channel_id which channel to send (default on constructor what you set)
+   */
+  channel_id?: string
+}
