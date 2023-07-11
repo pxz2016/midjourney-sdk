@@ -1,6 +1,6 @@
 {
   "name": "midjourney-sdk",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "MidJourney in Discord API for Node.js.",
   "packageManager": "pnpm@7.18.2",
   "type": "module",

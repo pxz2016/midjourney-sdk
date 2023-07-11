@@ -14,9 +14,4 @@ export interface MidJourneyOptions {
    * @default '9'
    */
   version?: 10 | 9
-  /**
-   * midjourney imagine command version
-   * @default '1118961510123847772'
-   */
-  imagine_version?: string
 }

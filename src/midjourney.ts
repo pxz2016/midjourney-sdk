@@ -5,7 +5,7 @@ export class MidJourney extends MidjourneyCommand {
   private session_id: string
 
   constructor(options: MidJourneyOptions) {
-    let { guild_id, session_id, channel_id, token } = options || {}
+    let { guild_id, session_id, token } = options || {}
     if (!guild_id) throw new Error('guild_id is required')
     if (!session_id) throw new Error('session_id is required')
     if (!token) throw new Error('token is required')
@@ -33,12 +33,16 @@ export class MidJourney extends MidjourneyCommand {
   }
 
   async imagine(value: string) {
-    const imagine = await this.commands('imagine')
-    const payload = this.#getPayload(
-      2,
-      Object.assign(imagine!, { options: [{ ...imagine?.options[0], value }] })
+    return this.commands('imagine').then((command) =>
+      this.#interactions(
+        this.#getPayload(
+          2,
+          Object.assign(command!, {
+            options: [{ ...command?.options[0], value }]
+          })
+        )
+      )
     )
-    return this.#interactions(payload)
   }
 
   upscale(index: number, msg_id: string, msg_hash: string) {
@@ -84,6 +88,55 @@ export class MidJourney extends MidjourneyCommand {
       }
     )
     return this.#interactions(payload)
+  }
+
+  zoomOut(size: 50 | 75, msg_id: string, msg_hash: string) {
+    const payload = this.#getPayload(
+      3,
+      {
+        component_type: 2,
+        custom_id: `MJ::Outpaint::${size}::1::${msg_hash}::SOLO`
+      },
+      {
+        message_flags: 0,
+        message_id: msg_id
+      }
+    )
+    return this.#interactions(payload)
+  }
+
+  customZoom(msg_id: string, msg_hash: string, value: string) {
+    const payload = this.#getPayload(
+      3,
+      {
+        component_type: 2,
+        custom_id: `MJ::CustomZoom::${msg_hash}`
+      },
+      {
+        message_flags: 0,
+        message_id: msg_id
+      }
+    )
+    return this.#interactions(payload)
+    // const payload = this.#getPayload(5, {
+    //   id: msg_id,
+    //   custom_id: `MJ::OutpaintCustomZoomModal::${msg_hash}`,
+    //   components: [
+    //     {
+    //       type: 1,
+    //       components: [
+    //         {
+    //           type: 4,
+    //           custom_id: 'MJ::OutpaintCustomZoomModal::prompt',
+    //           value
+    //         }
+    //       ]
+    //     }
+    //   ]
+    // })
+    // console.log(JSON.stringify(payload, null, 2))
+
+    // return this.#interactions(payload)
   }
 
   info() {

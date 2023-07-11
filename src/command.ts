@@ -34,7 +34,7 @@ export interface ApplicationCommond {
 export default class MidjourneyCommand {
   protected request: DiscordRequest
   protected channel_id: string
-  caches: Partial<Record<commandType, ApplicationCommond>> = {}
+  private caches: Partial<Record<commandType, ApplicationCommond>> = {}
 
   constructor({
     token,
@@ -62,7 +62,7 @@ export default class MidjourneyCommand {
         )
         .then(({ application_commands }) => {
           if (application_commands.length) {
-            this.caches[command] = application_commands.at(0)
+            this.caches[command] = application_commands[0]
             return this.caches[command]
           } else {
             return Promise.reject('command not found')

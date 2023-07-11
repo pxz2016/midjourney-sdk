@@ -51,7 +51,6 @@ const mj = new MidJourney({
   token: 'xxxxx',
   channel_id: 'xxxxx'
   // version: 9, # discord api version
-  // imagine_version: '' # the imagine command maybe change
 })
 ```
 
@@ -59,7 +58,7 @@ const mj = new MidJourney({
 
 ## Methods
 
-1. `generate`: trigger `imagine job` with midjourney
+1. `imagine`: trigger `imagine job` with midjourney
 
 - `value`: the image prompt
 
@@ -75,7 +74,18 @@ const mj = new MidJourney({
 - `msg_id`: current message id
 - `msg_hash`: current image id, you can get with `url.split('_').at(-1).split('.')[0]`
 
-4. `reset`: trigger `🔄` Button Component Event
+4. `reroll`: trigger `🔄` Button Component Event
 
 - `msg_id`: current message id
 - `msg_hash`: current image id, you can get with `url.split('_').at(-1).split('.')[0]`
+
+5. `zoomOut`: trigger `Zoom Out 2x` or `Zoom Out 1.5x` Button Component Event
+
+- `size`: `50` is 2x or `75` is 1.5x
+- `msg_id`: current message id
+- `msg_hash`: current image id, you can get with `url.split('_').at(-1).split('.')[0]`
+
+6. `info`: trigger `/info` command
+7. `settings`: trigger `/settings` command
+8. `fast`: toggle `fast` mode in global
+9. `relax`: toggle `relax` mode in global
