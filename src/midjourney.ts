@@ -1,24 +1,17 @@
-import DiscordRequest from './http'
+import MidjourneyCommand from './command'
 import { MidJourneyOptions } from './types'
-export class MidJourney {
-  private request: DiscordRequest
+export class MidJourney extends MidjourneyCommand {
   private guild_id: string
   private session_id: string
-  private channel_id: string
-  private imagine_version: string = '1118961510123847772'
 
   constructor(options: MidJourneyOptions) {
-    let { guild_id, session_id, channel_id, token, version, imagine_version } =
-      options || {}
+    let { guild_id, session_id, channel_id, token } = options || {}
     if (!guild_id) throw new Error('guild_id is required')
     if (!session_id) throw new Error('session_id is required')
-    if (!channel_id) throw new Error('channel_id is required')
     if (!token) throw new Error('token is required')
+    super(options)
     this.guild_id = guild_id
     this.session_id = session_id
-    this.channel_id = channel_id
-    imagine_version && (this.imagine_version = imagine_version)
-    this.request = new DiscordRequest(token, version)
   }
 
   #getPayload(type: number, data: any, others: any = {}) {
@@ -35,25 +28,17 @@ export class MidJourney {
     )
   }
 
-  interactions(payload: any) {
+  #interactions(payload: any) {
     return this.request.post('/interactions', payload)
   }
 
-  generate(value: string) {
-    const payload = this.#getPayload(2, {
-      version: this.imagine_version,
-      id: '938956540159881230',
-      name: 'imagine',
-      type: 1,
-      options: [
-        {
-          type: 3,
-          name: 'prompt',
-          value
-        }
-      ]
-    })
-    return this.interactions(payload)
+  async imagine(value: string) {
+    const imagine = await this.commands('imagine')
+    const payload = this.#getPayload(
+      2,
+      Object.assign(imagine!, { options: [{ ...imagine?.options[0], value }] })
+    )
+    return this.#interactions(payload)
   }
 
   upscale(index: number, msg_id: string, msg_hash: string) {
@@ -68,7 +53,7 @@ export class MidJourney {
         message_id: msg_id
       }
     )
-    return this.interactions(payload)
+    return this.#interactions(payload)
   }
 
   variation(index: number, msg_id: string, msg_hash: string) {
@@ -83,10 +68,10 @@ export class MidJourney {
         message_id: msg_id
       }
     )
-    return this.interactions(payload)
+    return this.#interactions(payload)
   }
 
-  reset(msg_id: string, msg_hash: string) {
+  reroll(msg_id: string, msg_hash: string) {
     const payload = this.#getPayload(
       3,
       {
@@ -98,6 +83,30 @@ export class MidJourney {
         message_id: msg_id
       }
     )
-    return this.interactions(payload)
+    return this.#interactions(payload)
+  }
+
+  info() {
+    return this.commands('info').then((command) =>
+      this.#interactions(this.#getPayload(2, command))
+    )
+  }
+
+  settings() {
+    return this.commands('settings').then((command) =>
+      this.#interactions(this.#getPayload(2, command))
+    )
+  }
+
+  fast() {
+    return this.commands('fast').then((command) =>
+      this.#interactions(this.#getPayload(2, command))
+    )
+  }
+
+  relax() {
+    return this.commands('relax').then((command) =>
+      this.#interactions(this.#getPayload(2, command))
+    )
   }
 }
