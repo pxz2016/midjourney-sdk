@@ -1,5 +1,6 @@
 import MidjourneyCommand from './command'
 import { MidJourneyOptions } from './types'
+
 export class MidJourney extends MidjourneyCommand {
   private guild_id: string
   private session_id: string
@@ -105,7 +106,8 @@ export class MidJourney extends MidjourneyCommand {
     return this.#interactions(payload)
   }
 
-  customZoom(msg_id: string, msg_hash: string, value: string) {
+  // open the dialog width `Zoom Out`
+  customZoom(msg_id: string, msg_hash: string) {
     const payload = this.#getPayload(
       3,
       {
@@ -118,25 +120,27 @@ export class MidJourney extends MidjourneyCommand {
       }
     )
     return this.#interactions(payload)
-    // const payload = this.#getPayload(5, {
-    //   id: msg_id,
-    //   custom_id: `MJ::OutpaintCustomZoomModal::${msg_hash}`,
-    //   components: [
-    //     {
-    //       type: 1,
-    //       components: [
-    //         {
-    //           type: 4,
-    //           custom_id: 'MJ::OutpaintCustomZoomModal::prompt',
-    //           value
-    //         }
-    //       ]
-    //     }
-    //   ]
-    // })
-    // console.log(JSON.stringify(payload, null, 2))
+  }
 
-    // return this.#interactions(payload)
+  // this msg_id is not id by the photo，that is dialog message id，you can get with `ws` option to listen ws event `INTERACTION_CREATE` or `INTERACTION_SUCCESS` payload
+  submitCustomZoom(msg_id: string, msg_hash: string, value: string) {
+    const payload = this.#getPayload(5, {
+      id: msg_id,
+      custom_id: `MJ::OutpaintCustomZoomModal::${msg_hash}`,
+      components: [
+        {
+          type: 1,
+          components: [
+            {
+              type: 4,
+              custom_id: 'MJ::OutpaintCustomZoomModal::prompt',
+              value
+            }
+          ]
+        }
+      ]
+    })
+    return this.#interactions(payload)
   }
 
   info() {

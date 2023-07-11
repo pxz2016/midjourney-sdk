@@ -17,19 +17,23 @@ export default class DiscordRequest {
     )
   }
 
-  get<T = any, D = any>(url: string, config?: AxiosRequestConfig) {
+  get<T = any, D = any>(url: string, config?: AxiosRequestConfig<D>) {
     return this.#http.get<T, T, D>(url, config)
   }
 
-  post<T = any, D = any>(url: string, data?: D, config?: AxiosRequestConfig) {
+  post<T = any, D = any>(
+    url: string,
+    data?: D,
+    config?: AxiosRequestConfig<D>
+  ) {
     return this.#http.post<T, T, D>(url, data, config)
   }
 
-  put<T = any, D = any>(url: string, data?: D, config?: AxiosRequestConfig) {
+  put<T = any, D = any>(url: string, data?: D, config?: AxiosRequestConfig<D>) {
     return this.#http.put<T, T, D>(url, data, config)
   }
 
-  delete<T = any, D = any>(url: string, config?: AxiosRequestConfig) {
+  delete<T = any, D = any>(url: string, config?: AxiosRequestConfig<D>) {
     return this.#http.delete<T, T, D>(url, config)
   }
 }

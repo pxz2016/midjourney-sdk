@@ -49,12 +49,21 @@ const mj = new MidJourney({
   session_id: 'xxxxx',
   guild_id: 'xxxxx',
   token: 'xxxxx',
-  channel_id: 'xxxxx'
+  channel_id: 'xxxxx',
+  ws: (type, payload) => {
+    console.log(type, payload) // do something
+  }
   // version: 9, # discord api version
 })
 ```
 
-- exec `pnpm example`
+## Test & Development
+
+- edit environment `.env` file
+
+```bash
+pnpm dev
+```
 
 ## Methods
 
@@ -85,7 +94,18 @@ const mj = new MidJourney({
 - `msg_id`: current message id
 - `msg_hash`: current image id, you can get with `url.split('_').at(-1).split('.')[0]`
 
-6. `info`: trigger `/info` command
-7. `settings`: trigger `/settings` command
-8. `fast`: toggle `fast` mode in global
-9. `relax`: toggle `relax` mode in global
+6. `customZoom`: trigger `Custom Zoom` Button Component Event
+
+- `msg_id`: current message id
+- `msg_hash`: current image id, you can get with `url.split('_').at(-1).split('.')[0]`
+
+7. `submitCustomZoom`: submit `Custom Zoom` form
+
+- `msg_id`: this msg_id is not id by the photo，that is dialog message id，you can get with `ws` option to listen ws event `INTERACTION_CREATE` or `INTERACTION_SUCCESS` payload
+- `msg_hash`: current image id, you can get with `url.split('_').at(-1).split('.')[0]`
+- `value`: submit value
+
+8. `info`: trigger `/info` command
+9. `settings`: trigger `/settings` command
+10. `fast`: toggle `fast` mode in global
+11. `relax`: toggle `relax` mode in global

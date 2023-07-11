@@ -1,26 +1,6 @@
 import DiscordRequest from './http'
-import { MidJourneyOptions } from './types'
-
-export const commands = [
-  'ask',
-  'blend',
-  'describe',
-  'fast',
-  'help',
-  'imagine',
-  'info',
-  'prefer',
-  'private',
-  'public',
-  'relax',
-  'settings',
-  'show',
-  'stealth',
-  'shorten',
-  'subscribe'
-] as const
-
-export type commandType = (typeof commands)[number]
+import { MidJourneyOptions, commandType } from './types'
+import DiscordWs from './ws'
 
 export interface ApplicationCommond {
   version: string
@@ -35,15 +15,18 @@ export default class MidjourneyCommand {
   protected request: DiscordRequest
   protected channel_id: string
   private caches: Partial<Record<commandType, ApplicationCommond>> = {}
-
   constructor({
     token,
     version,
-    channel_id
-  }: Pick<MidJourneyOptions, 'token' | 'version' | 'channel_id'>) {
+    channel_id,
+    ws
+  }: Pick<MidJourneyOptions, 'token' | 'version' | 'channel_id' | 'ws'>) {
     if (!channel_id) throw new Error('channel_id is required')
     this.channel_id = channel_id
     this.request = new DiscordRequest(token, version)
+    if (ws) {
+      new DiscordWs({ token, ws })
+    }
   }
 
   commands(command: commandType) {
