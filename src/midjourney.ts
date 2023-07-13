@@ -3,16 +3,12 @@ import { MidJourneyOptions } from './types'
 
 export class MidJourney extends MidjourneyCommand {
   private guild_id: string
-  private session_id: string
 
   constructor(options: MidJourneyOptions) {
-    let { guild_id, session_id, token } = options || {}
+    let { guild_id } = options || {}
     if (!guild_id) throw new Error('guild_id is required')
-    if (!session_id) throw new Error('session_id is required')
-    if (!token) throw new Error('token is required')
     super(options)
     this.guild_id = guild_id
-    this.session_id = session_id
   }
 
   #getPayload(type: number, data: any, others: any = {}) {

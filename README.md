@@ -46,14 +46,34 @@ pnpm i midjourney-sdk
 ```typescript
 import { MidJourney } from 'midjourney-sdk'
 const mj = new MidJourney({
-  session_id: 'xxxxx',
   guild_id: 'xxxxx',
   token: 'xxxxx',
-  channel_id: 'xxxxx',
-  ws: (type, payload) => {
-    console.log(type, payload) // do something
-  }
+  channel_id: 'xxxxx'
   // version: 9, # discord api version
+})
+
+// listen midjourney message callback
+mj.on('message', (msg) => {
+  const payload = JSON.parse(msg.toString())
+  const type = payload.t as WsEventType
+  const data = payload.d
+  switch (type) {
+    case 'READY':
+      console.log(data.user)
+      break
+    case 'MESSAGE_CREATE':
+      console.log(data)
+      break
+    case 'MESSAGE_UPDATE':
+      console.log(data)
+      break
+    case 'INTERACTION_SUCCESS':
+      console.log(data)
+      break
+    case 'INTERACTION_CREATE':
+      console.log(data)
+      break
+  }
 })
 ```
 

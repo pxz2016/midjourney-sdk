@@ -1,32 +1,34 @@
+import { WebSocket, MessageEvent } from 'ws'
 import DiscordRequest from './http'
-import { MidJourneyOptions, commandType } from './types'
-import DiscordWs from './ws'
+import {
+  MidJourneyOptions,
+  commandType,
+  ApplicationCommond,
+  WsEventType,
+  WsEventTypes
+} from './types'
 
-export interface ApplicationCommond {
-  version: string
-  id: string
-  name: string
-  type: number
-  options: { type: number; name: string; [key: string]: any }[]
-  [key: string]: any
-}
-
-export default class MidjourneyCommand {
+export default class MidjourneyCommand extends WebSocket {
   protected request: DiscordRequest
   protected channel_id: string
+  protected session_id: string | undefined
   private caches: Partial<Record<commandType, ApplicationCommond>> = {}
+  private token: MidJourneyOptions['token']
+  private heartbeatInterval: NodeJS.Timer | null = null
   constructor({
     token,
     version,
-    channel_id,
-    ws
-  }: Pick<MidJourneyOptions, 'token' | 'version' | 'channel_id' | 'ws'>) {
+    channel_id
+  }: Pick<MidJourneyOptions, 'token' | 'version' | 'channel_id'>) {
     if (!channel_id) throw new Error('channel_id is required')
+    if (!token) throw new Error('token is required')
+    super('wss://gateway.discord.gg?v=9&encoding=json&compress=gzip-stream')
     this.channel_id = channel_id
+    this.token = token
     this.request = new DiscordRequest(token, version)
-    if (ws) {
-      new DiscordWs({ token, ws })
-    }
+    this.onopen = this.#open.bind(this)
+    this.onclose = this.#close.bind(this)
+    this.on('message', this.#message.bind(this))
   }
 
   commands(command: commandType) {
@@ -53,5 +55,44 @@ export default class MidjourneyCommand {
         })
     }
     return Promise.resolve(this.caches[command])
+  }
+
+  #open() {
+    this.heartbeatInterval = setInterval(() => {
+      if (this.readyState === WebSocket.OPEN) {
+        this.ping()
+      }
+    }, 5000)
+    this.send(
+      JSON.stringify({
+        op: 2,
+        d: {
+          token: this.token,
+          capabilities: 8189,
+          properties: {
+            os: 'Mac OS X',
+            browser: 'Chrome',
+            device: ''
+          },
+          compress: false
+        }
+      })
+    )
+  }
+
+  #message(msg: Buffer) {
+    const payload = JSON.parse(msg.toString())
+    const data = payload.d
+    const type = payload.t as WsEventType
+    if (type === WsEventTypes[0]) {
+      this.session_id = data.session_id
+    }
+  }
+
+  #close() {
+    if (this.heartbeatInterval) {
+      clearInterval(this.heartbeatInterval)
+      this.heartbeatInterval = null
+    }
   }
 }
