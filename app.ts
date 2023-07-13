@@ -1,4 +1,5 @@
-import 'dotenv/config'
+import { config } from 'dotenv'
+config({ path: './.env.local' })
 import { MidJourney, WsEventType } from './src'
 const mj = new MidJourney({
   guild_id: <string>process.env.GUILD_ID,
@@ -28,11 +29,17 @@ mj.on('message', (msg) => {
       break
   }
 })
-;(() => {
+;(async () => {
   // wait the ws connection success
   setTimeout(async () => {
-    await mj.imagine('apple').catch((err) => {
-      console.log(err)
-    })
+    await mj
+      .submitCustomZoom(
+        '1129013890869645372',
+        'c3beb1ce-eaee-4309-bdbc-b2e90f888a6a',
+        'apple --ar 1:1 --zoom 2'
+      )
+      .catch((err) => {
+        console.log(err)
+      })
   }, 3000)
 })()
