@@ -2,41 +2,7 @@
 
 MidJourney in Discord API for Node.js.
 
-## UML
-
-```mermaid
-sequenceDiagram
-    participant ThirdServer
-    participant APIServer
-    participant DiscordAPI
-
-    ThirdServer->>APIServer: request api trigger task
-    APIServer->>APIServer: join in job tasks
-    APIServer->>DiscordAPI: invoke api to trigger task
-    APIServer-->>ThirdServer: callback trigger result
-
-    DiscordAPI->>DiscordAPI: listen Midjourney bot tasks
-    DiscordAPI->>DiscordAPI: listen MidJourney bot message
-    DiscordAPI-->>ThirdServer: callback the message what the listen
-    DiscordAPI-->>APIServer: clear tasks
-```
-
 ## Install
-
-npm
-
-```bash
-npm i midjourney-sdk
-```
-
-yarn
-
-```bash
-yarn install midjourney-sdk
-```
-
-pnpm
-
 ```bash
 pnpm i midjourney-sdk
 ```
@@ -76,58 +42,41 @@ mj.on('message', (msg) => {
   }
 })
 
+// you can receive the image url on listen `MESSAGE_CREATE` or `MESSAGE_UPDATE` type of the `message` event
 await mj.imagine('ferrari --q 5 --ar 16:9')
 ```
 
 ## Test & Development
 
 - edit environment `.env` file
+```
+CHANNEL_ID=
+GUILD_ID=
+TOKEN=
+```
 
+- run `dev` script
 ```bash
 pnpm dev
 ```
 
 ## Methods
+> - `msg_id`: current message id
+> - `msg_hash`: current image id, you can get with `url.split('_').at(-1).split('.')[0]`
+> - `size`: `50` is 2x or `75` is 1.5x
+> - `msg_id`: `submitCustomZoom` msg_id is not id by the photo，that is dialog message id，you can listen event `INTERACTION_CREATE` or `INTERACTION_SUCCESS` payload
+- [x] `imagine`: trigger `imagine job` with midjourney
+- [x] `upscale`: trigger `U` Button Component Event
+- [x] `variation`: trigger `V` Button Component Event
+- [x] `reroll`: trigger `🔄` Button Component Event
+- [x] `zoomOut`: trigger `Zoom Out 2x` or `Zoom Out 1.5x` Button Component Event
+- [x] `customZoom`: trigger `Custom Zoom` Button Component Event
+- [x] `submitCustomZoom`: submit `Custom Zoom` form
+- [x] `info`: trigger `/info` comman
+- [x] `settings`: trigger `/settings` command
+- [x] `fast`: toggle `fast` mode in global
+- [x] `relax`: toggle `relax` mode in global
 
-1. `imagine`: trigger `imagine job` with midjourney
+## Contributing
 
-- `value`: the image prompt
-
-2. `upscale`: trigger `U` Button Component Event
-
-- `index`: the index of the `U` Button
-- `msg_id`: current message id
-- `msg_hash`: current image id, you can get with `url.split('_').at(-1).split('.')[0]`
-
-3. `variation`: trigger `V` Button Component Event
-
-- `index`: the index of the `V` Button
-- `msg_id`: current message id
-- `msg_hash`: current image id, you can get with `url.split('_').at(-1).split('.')[0]`
-
-4. `reroll`: trigger `🔄` Button Component Event
-
-- `msg_id`: current message id
-- `msg_hash`: current image id, you can get with `url.split('_').at(-1).split('.')[0]`
-
-5. `zoomOut`: trigger `Zoom Out 2x` or `Zoom Out 1.5x` Button Component Event
-
-- `size`: `50` is 2x or `75` is 1.5x
-- `msg_id`: current message id
-- `msg_hash`: current image id, you can get with `url.split('_').at(-1).split('.')[0]`
-
-6. `customZoom`: trigger `Custom Zoom` Button Component Event
-
-- `msg_id`: current message id
-- `msg_hash`: current image id, you can get with `url.split('_').at(-1).split('.')[0]`
-
-7. `submitCustomZoom`: submit `Custom Zoom` form
-
-- `msg_id`: this msg_id is not id by the photo，that is dialog message id，you can get with `ws` option to listen ws event `INTERACTION_CREATE` or `INTERACTION_SUCCESS` payload
-- `msg_hash`: current image id, you can get with `url.split('_').at(-1).split('.')[0]`
-- `value`: submit value
-
-8. `info`: trigger `/info` command
-9. `settings`: trigger `/settings` command
-10. `fast`: toggle `fast` mode in global
-11. `relax`: toggle `relax` mode in global
+Have a feature you'd like to see added? Create a [pull request](https://github.com/LaiBaoYuan/midjourney-sdk/pulls) or open an [issue](https://github.com/LaiBaoYuan/midjourney-sdk/issues).
