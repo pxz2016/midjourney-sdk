@@ -4,15 +4,14 @@ import { MidJourneyOptions, WsEventType } from './types'
 export default class DiscordWs {
   // @ts-ignore
   protected wss: WebSocket
-  protected session_id: string | undefined
-  private token: MidJourneyOptions['token']
+  private botToken: string
   private ws: MidJourneyOptions['ws']
 
   private heartbeatInterval: NodeJS.Timer | null = null
   private reconnectInterval = 3000
   constructor({ token, ws }: Pick<MidJourneyOptions, 'token' | 'ws'>) {
     this.ws = ws
-    this.token = token
+    this.botToken = token
     this.#connect()
   }
 
@@ -31,7 +30,7 @@ export default class DiscordWs {
       JSON.stringify({
         op: 2,
         d: {
-          token: this.token,
+          token: this.botToken,
           capabilities: 8189,
           properties: {
             os: 'Mac OS X',
@@ -54,8 +53,6 @@ export default class DiscordWs {
     }
     switch (type) {
       case 'READY':
-        this.session_id = payload.session_id
-        console.log(payload.session_id)
         this.ws!('READY', payload.user)
         break
       case 'MESSAGE_CREATE':
@@ -75,7 +72,7 @@ export default class DiscordWs {
   #reconnect() {
     this.#stopHeartbeat()
     setTimeout(() => {
-      console.log('Reconnecting discord ws services...')
+      console.log('Reconnecting...')
       this.#connect()
     }, this.reconnectInterval)
   }
