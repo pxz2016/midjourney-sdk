@@ -75,6 +75,8 @@ mj.on('message', (msg) => {
       break
   }
 })
+
+await mj.imagine('ferrari --q 5 --ar 16:9')
 ```
 
 ## Test & Development
