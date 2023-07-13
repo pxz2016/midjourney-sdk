@@ -15,6 +15,7 @@ export default class MidjourneyCommand extends WebSocket {
   private caches: Partial<Record<commandType, ApplicationCommond>> = {}
   private token: MidJourneyOptions['token']
   private heartbeatInterval: NodeJS.Timer | null = null
+  private lastEventNum: number | null = null
   constructor({
     token,
     version,
@@ -60,7 +61,12 @@ export default class MidjourneyCommand extends WebSocket {
   #open() {
     this.heartbeatInterval = setInterval(() => {
       if (this.readyState === WebSocket.OPEN) {
-        this.ping()
+        this.send(
+          JSON.stringify({
+            op: 1,
+            d: this.lastEventNum
+          })
+        )
       }
     }, 5000)
     this.send(
@@ -84,6 +90,8 @@ export default class MidjourneyCommand extends WebSocket {
     const payload = JSON.parse(msg.toString())
     const data = payload.d
     const type = payload.t as WsEventType
+    const s = payload.s as number
+    s && (this.lastEventNum = s)
     if (type === WsEventTypes[0]) {
       this.session_id = data.session_id
     }

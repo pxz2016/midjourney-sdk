@@ -1,5 +1,5 @@
 import { config } from 'dotenv'
-config({ path: './.env.local' })
+config({ path: './.env' })
 import { MidJourney, WsEventType } from './src'
 const mj = new MidJourney({
   guild_id: <string>process.env.GUILD_ID,
