@@ -42,6 +42,21 @@ export class MidJourney extends MidjourneyCommand {
     )
   }
 
+  action(msg_id: string, custom_id: string) {
+    const payload = this.#getPayload(
+      3,
+      {
+        component_type: 2,
+        custom_id
+      },
+      {
+        message_flags: 0,
+        message_id: msg_id
+      }
+    )
+    return this.#interactions(payload)
+  }
+
   upscale(index: number, msg_id: string, msg_hash: string) {
     const payload = this.#getPayload(
       3,

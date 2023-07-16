@@ -66,6 +66,7 @@ pnpm dev
 > - `size`: `50` is 2x or `75` is 1.5x
 > - `msg_id`: `submitCustomZoom` msg_id is not id by the photo，that is dialog message id，you can listen event `INTERACTION_CREATE` or `INTERACTION_SUCCESS` payload
 - [x] `imagine`: trigger `imagine job` with midjourney
+- [x] `action`: execute `upscale`、`variation` or `reroll` and so on by `custom_id`
 - [x] `upscale`: trigger `U` Button Component Event
 - [x] `variation`: trigger `V` Button Component Event
 - [x] `reroll`: trigger `🔄` Button Component Event
