@@ -18,8 +18,11 @@ export interface MidJourneyOptions {
 
 export const WsEventTypes = [
   'READY',
+  'READY_SUPPLEMENTAL',
   'MESSAGE_CREATE',
   'MESSAGE_UPDATE',
+  'MESSAGE_DELETE',
+  'MESSAGE_ACK',
   'INTERACTION_SUCCESS',
   'INTERACTION_CREATE'
 ] as const
