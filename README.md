@@ -22,9 +22,8 @@ const mj = new MidJourney({
 
 // listen midjourney message callback
 mj.on('message', (msg) => {
-  const payload = JSON.parse(msg.toString())
-  const type = payload.t as WsEventType
-  const data = payload.d
+  const type = msg.t as WsEventType
+  const data = msg.d
   switch (type) {
     case 'READY':
       console.log(data.user)
@@ -33,6 +32,9 @@ mj.on('message', (msg) => {
       console.log(data)
       break
     case 'MESSAGE_UPDATE':
+      console.log(data)
+      break
+    case 'MESSAGE_DELETE':
       console.log(data)
       break
     case 'INTERACTION_SUCCESS':

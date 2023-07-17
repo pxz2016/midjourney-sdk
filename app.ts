@@ -9,10 +9,9 @@ const mj = new MidJourney({
   debug: true
 })
 
-mj.ws.on('message', (msg) => {
-  const payload = JSON.parse(msg.toString())
-  const type = payload.t as WsEventType
-  const data = payload.d
+mj.on('message', (msg) => {
+  const type = msg.t as WsEventType
+  const data = msg.d
   switch (type) {
     case 'READY':
       console.log(data.user)

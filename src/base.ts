@@ -7,24 +7,26 @@ import {
   commandType
 } from './types'
 import { WS_URL, WsEventTypes } from './constant'
+import EventEmitter from 'events'
 
-export default class MidjourneyBase {
+export default class MidjourneyBase extends EventEmitter {
   protected options: MidJourneyOptions
   protected request: DiscordRequest
   protected session_id: string | undefined
-  ws: WebSocket
+  #ws: WebSocket
   #caches: Partial<Record<commandType, ApplicationCommond>> = {}
   #reconnectionTask: NodeJS.Timeout | null = null
   #heartbeatTask: NodeJS.Timer | null = null
   #lastSequence: number | null = null
 
   constructor(options: MidJourneyOptions) {
+    super()
     if (!options.guild_id) throw new Error('guild_id is required')
     if (!options.channel_id) throw new Error('channel_id is required')
     if (!options.token) throw new Error('token is required')
     this.options = options
     this.request = new DiscordRequest(options.token, options.version)
-    this.ws = this.#connect()
+    this.#ws = this.#connect()
   }
 
   #connect() {
@@ -35,7 +37,7 @@ export default class MidjourneyBase {
         clearTimeout(this.#reconnectionTask)
         this.#reconnectionTask = null
       }
-      this.ws.send(
+      this.#ws.send(
         JSON.stringify({
           op: 2,
           d: {
@@ -51,24 +53,29 @@ export default class MidjourneyBase {
       )
     })
     ws.on('message', this.#message.bind(this))
-    ws.on('error', () => this.ws.close())
-    ws.on(
-      'close',
-      () =>
-        (this.#reconnectionTask = setTimeout(() => {
-          this.debug('discord ws reconnect...')
-          if (this.#heartbeatTask) {
-            clearInterval(this.#heartbeatTask)
-            this.#heartbeatTask = null
-          }
-          this.ws = this.#connect.call(this)
-        }, 4000))
-    )
+    ws.on('error', (err) => {
+      this.debug(`discord ws occurred an error: ${err.message}`)
+      this.#ws.close()
+    })
+    ws.on('close', (code, reason) => {
+      this.debug(
+        `discord ws was close, error code: ${code}, error reason: ${reason}`
+      )
+      this.#reconnectionTask = setTimeout(() => {
+        this.debug('discord ws reconnect...')
+        if (this.#heartbeatTask) {
+          clearInterval(this.#heartbeatTask)
+          this.#heartbeatTask = null
+        }
+        this.#ws = this.#connect.call(this)
+      }, 4000)
+    })
     return ws
   }
 
   #message(msg: Buffer) {
     const payload = JSON.parse(msg.toString())
+    this.emit('message', payload)
     const data = payload.d
     const type = payload.t as WsEventType
     const seq = payload.s as number
@@ -76,8 +83,8 @@ export default class MidjourneyBase {
     seq && (this.#lastSequence = seq)
     if (operate === 10) {
       this.#heartbeatTask = setInterval(() => {
-        if (this.ws.readyState === WebSocket.OPEN) {
-          this.ws.send(
+        if (this.#ws.readyState === WebSocket.OPEN) {
+          this.#ws.send(
             JSON.stringify({
               op: 1,
               d: this.#lastSequence
