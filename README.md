@@ -3,6 +3,7 @@
 MidJourney in Discord API for Node.js.
 
 ## Install
+
 ```bash
 pnpm i midjourney-sdk
 ```
@@ -14,7 +15,8 @@ import { MidJourney } from 'midjourney-sdk'
 const mj = new MidJourney({
   guild_id: 'xxxxx',
   token: 'xxxxx',
-  channel_id: 'xxxxx'
+  channel_id: 'xxxxx',
+  debug: true
   // version: 9, # discord api version
 })
 
@@ -49,6 +51,7 @@ await mj.imagine('ferrari --q 5 --ar 16:9')
 ## Test & Development
 
 - edit environment `.env` file
+
 ```
 CHANNEL_ID=
 GUILD_ID=
@@ -56,15 +59,18 @@ TOKEN=
 ```
 
 - run `dev` script
+
 ```bash
 pnpm dev
 ```
 
 ## Methods
+
 > - `msg_id`: current message id
 > - `msg_hash`: current image id, you can get with `url.split('_').at(-1).split('.')[0]`
 > - `size`: `50` is 2x or `75` is 1.5x
-> - `msg_id`: `submitCustomZoom` msg_id is not id by the photo，that is dialog message id，you can listen event `INTERACTION_CREATE` or `INTERACTION_SUCCESS` payload
+> - `submitCustomZoom 's msg_id` is not id by the photo，that is dialog message id，you can listen event `INTERACTION_CREATE` or `INTERACTION_SUCCESS` payload
+
 - [x] `imagine`: trigger `imagine job` with midjourney
 - [x] `action`: execute `upscale`、`variation` or `reroll` and so on by `custom_id`
 - [x] `upscale`: trigger `U` Button Component Event

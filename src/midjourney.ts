@@ -1,23 +1,23 @@
-import MidjourneyCommand from './command'
+import MidjourneyBase from './base'
 import { MidJourneyOptions } from './types'
 
-export class MidJourney extends MidjourneyCommand {
-  private guild_id: string
-
+export class MidJourney extends MidjourneyBase {
   constructor(options: MidJourneyOptions) {
-    let { guild_id } = options || {}
-    if (!guild_id) throw new Error('guild_id is required')
     super(options)
-    this.guild_id = guild_id
   }
 
   #getPayload(type: number, data: any, others: any = {}) {
+    if (!this.session_id) {
+      throw new Error(
+        'session_id is not undefined，and maybe Websocket encountered an error during initialization or your token is not a user token'
+      )
+    }
     return Object.assign(
       {
         type,
         application_id: '936929561302675456',
-        guild_id: this.guild_id,
-        channel_id: this.channel_id,
+        guild_id: this.options.guild_id,
+        channel_id: this.options.channel_id,
         session_id: this.session_id,
         data
       },

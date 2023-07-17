@@ -1,3 +1,5 @@
+import { WsEventTypes, commands } from './constant'
+
 export interface MidJourneyOptions {
   /**
    * discord user token
@@ -15,36 +17,6 @@ export interface MidJourneyOptions {
   version?: 10 | 9
   debug?: boolean
 }
-
-export const WsEventTypes = [
-  'READY',
-  'READY_SUPPLEMENTAL',
-  'MESSAGE_CREATE',
-  'MESSAGE_UPDATE',
-  'MESSAGE_DELETE',
-  'MESSAGE_ACK',
-  'INTERACTION_SUCCESS',
-  'INTERACTION_CREATE'
-] as const
-
-export const commands = [
-  'ask',
-  'blend',
-  'describe',
-  'fast',
-  'help',
-  'imagine',
-  'info',
-  'prefer',
-  'private',
-  'public',
-  'relax',
-  'settings',
-  'show',
-  'stealth',
-  'shorten',
-  'subscribe'
-] as const
 
 export type WsEventType = (typeof WsEventTypes)[number]
 
