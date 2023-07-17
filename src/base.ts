@@ -32,6 +32,7 @@ export default class MidjourneyBase extends EventEmitter {
   #connect() {
     const ws = new WebSocket(WS_URL)
     ws.on('open', () => {
+      this.emit('open')
       this.debug('discord ws connect successfully!')
       if (this.#reconnectionTask) {
         clearTimeout(this.#reconnectionTask)
@@ -54,10 +55,12 @@ export default class MidjourneyBase extends EventEmitter {
     })
     ws.on('message', this.#message.bind(this))
     ws.on('error', (err) => {
+      this.emit('error', err)
       this.debug(`discord ws occurred an error: ${err.message}`)
       this.#ws.close()
     })
     ws.on('close', (code, reason) => {
+      this.emit('close', code, reason)
       this.debug(
         `discord ws was close, error code: ${code}, error reason: ${reason}`
       )
