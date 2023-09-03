@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "pnpm -F playground dev",
     "build": "pnpm -F midjourney-sdk build",
-    "format": "prettier --check --write ."
+    "format": "prettier --check --write .",
+    "proxy": "pnpm -F proxy start"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^25.0.0",

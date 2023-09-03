@@ -1,0 +1,12 @@
+{
+  "name": "@midjourney-sdk/proxy",
+  "scripts": {
+    "start": "node index"
+  },
+  "dependencies": {
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "http-proxy-middleware": "^2.0.6",
+    "https-proxy-agent": "^7.0.1"
+  }
+}

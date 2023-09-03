@@ -1,5 +1,5 @@
 import { MidjourneyCommand } from './command'
-import { MidJourneyFullOptions } from './types'
+import { MessageCallBack, MidJourneyFullOptions, MjMessage } from './types'
 import { nextNonce } from './utils'
 
 export class MidjourneyApi extends MidjourneyCommand {
@@ -19,9 +19,14 @@ export class MidjourneyApi extends MidjourneyCommand {
     })
   }
 
-  private getPayload(type: number, data: any, others: any = {}, nonce = nextNonce()) {
-    if (!this.opts.session_id) {
-      throw new Error('session_id is undefined')
+  private getPayload(
+    type: number,
+    data: any,
+    others: any = {},
+    nonce = nextNonce()
+  ) {
+    if (!this.opts.session_id && this.opts.initialize !== 'initialized') {
+      throw new Error('please invoke `init` method before every operate')
     }
     return Object.assign(
       {
@@ -37,20 +42,31 @@ export class MidjourneyApi extends MidjourneyCommand {
     )
   }
 
-  async imagine(value: string) {
-    return this.getCommand('imagine').then((command) =>
-      this.interactions(
-        this.getPayload(
-          2,
-          Object.assign(command!, {
-            options: [{ ...command?.options[0], value }]
-          })
-        )
+  async imagine(value: string, cb: (msg: MjMessage) => void) {
+    const nonce = nextNonce()
+    value = `nonce: ${nonce}, ${value}`
+    return this.getCommand('imagine').then((command) => {
+      const payload = this.getPayload(
+        2,
+        Object.assign(command!, {
+          options: [{ ...command?.options[0], value }]
+        }),
+        {},
+        nonce
       )
-    )
+      return Promise.all([
+        this.interactions(payload),
+        this.opts.ws?.waitImageMessage({ nonce: payload.nonce, cb })
+      ]).then(([_, res]) => res)
+    })
   }
 
-  action(message_id: string, custom_id: string, message_flags: number) {
+  action(
+    message_id: string,
+    custom_id: string,
+    message_flags: number,
+    cb: (msg: MjMessage) => void
+  ) {
     const payload = this.getPayload(
       3,
       {
@@ -62,18 +78,27 @@ export class MidjourneyApi extends MidjourneyCommand {
         message_id
       }
     )
-    return this.interactions(payload)
+    return Promise.all([
+      this.interactions(payload),
+      this.opts.ws?.waitImageMessage({ nonce: payload.nonce, cb })
+    ]).then(([_, res]) => res)
   }
 
-  info() {
+  info(cb?: MessageCallBack) {
     return this.getCommand('info').then((command) =>
-      this.interactions(this.getPayload(2, command))
+      Promise.all([
+        this.interactions(this.getPayload(2, command)),
+        this.opts.ws?.waitInfo(cb)
+      ]).then(([_, msg]) => msg)
     )
   }
 
-  settings() {
+  settings(cb?: MessageCallBack) {
     return this.getCommand('settings').then((command) =>
-      this.interactions(this.getPayload(2, command))
+      Promise.all([
+        this.interactions(this.getPayload(2, command)),
+        this.opts.ws?.waitSetting(cb)
+      ]).then(([_, msg]) => msg)
     )
   }
 

@@ -7,5 +7,6 @@ export const defaultOpts = {
   wsBaseUrl: 'wss://gateway.discord.gg/?encoding=json&v=9',
   imgBaseUrl: 'https://cdn.discordapp.com',
   debug,
-  fetch
+  fetch,
+  skipHeartbeat: false
 } as MidJourneyOptions

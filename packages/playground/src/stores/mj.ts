@@ -1,22 +1,26 @@
-import { MidJourney } from 'midjourney-sdk'
-
-export const ins = new MidJourney({
-  token: import.meta.env.VITE_TOKEN,
-  guild_id: import.meta.env.VITE_GUILD_ID,
-  channel_id: import.meta.env.VITE_CHANNEL_ID,
-  apiBaseUrl: 'https://proxy.atjia.com/proxy/discord',
-  imgBaseUrl: 'https://proxy.atjia.com/proxy/discordapp',
-  wsBaseUrl: 'wss://proxy.atjia.com/proxy/discordWs?encoding=json&v=9'
-})
+import { MidJourney, MidJourneyOptions, MjMessage } from 'midjourney-sdk'
 
 export const useMjStore = defineStore('midjourney', {
   state: () => ({
-    ins,
-    user: ''
+    ins: null as MidJourney | null,
+    user: null as any,
+    mapping: {} as Record<MjMessage['id'], MjMessage>
   }),
+  getters: {
+    remix: ({ ins }) => (ins?.opts.remix ? 'yes' : 'no'),
+    user: ({ ins }) => ins?.opts.user,
+    initialized: ({ ins }) => ins?.opts.initialize === 'initialized'
+  },
   actions: {
-    setUser(user: any) {
-      this.user = user
+    init(opts: MidJourneyOptions) {
+      this.ins = new MidJourney({
+        ...opts,
+        apiBaseUrl: import.meta.env.VITE_API_BASE_URL,
+        imgBaseUrl: import.meta.env.VITE_IMG_BASE_URL,
+        wsBaseUrl: import.meta.env.VITE_WS_BASE_URL,
+        skipHeartbeat: true
+      })
+      return this.ins.init()
     }
   }
 })
