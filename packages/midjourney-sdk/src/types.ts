@@ -81,7 +81,7 @@ export interface MjMessage {
   url?: string
   error?: MjOriginMessage['embeds'][number]
   progress?: number
-  components?: any[]
+  components?: MjOriginMessage['components']
   originId?: string
   [key: string]: any
 }

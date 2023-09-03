@@ -38,6 +38,7 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
   }
 
   #connect() {
+    console.log(this.opts.wsBaseUrl)
     const ws = new WebSocket(this.opts.wsBaseUrl)
     ws.addEventListener('open', () => {
       this.emit('WS_OPEN')
@@ -216,7 +217,8 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
   }
 
   processingImage(message: MjOriginMessage) {
-    const { content, id, attachments, flags, components, nonce } = message
+    const { content, id, attachments, flags, components, nonce, timestamp } =
+      message
     let msg = this.msgMap.getMsgById(id)
     let jobNonce = msg?.nonce || getContentNonce(content)
     if (!jobNonce) return
@@ -241,8 +243,9 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
         url,
         content,
         flags,
-        components: formatComponents(components),
-        progress
+        components,
+        progress,
+        timestamp
       })
     )
     this.emit(parseInt(jobNonce), mjMsg) && this.msgMap.set(jobNonce, mjMsg)

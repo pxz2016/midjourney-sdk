@@ -1,75 +1,112 @@
 <template>
-  <div class="p-5">
-    <h1 class="text-center text-2xl font-bold mb-2">Midjourney-SDK Example</h1>
+  <div
+    class="pb-[10vh] pt-5 bg-gray-950/80 text-white h-full w-full relative overflow-auto"
+  >
+    <h1 class="text-center text-2xl font-bold">Midjourney-SDK Example</h1>
+    <a
+      href="https://github.com/LaiBaoYuan/midjourney-sdk"
+      class="text-center underline m-auto block mb-5"
+      target="_blank"
+      >It's useful for you, please give me open source power and support star in
+      my `midjourney-sdk` repo.</a
+    >
     <form
       v-if="!mj.initialized"
       @submit.prevent="mj.init(form)"
-      class="flex flex-col gap-2"
+      class="flex flex-col p-5 gap-2"
     >
-      <div class="border flex items-center gap-4 p-2 rounded">
-        <div class="w-24 text-right">guild_id:</div>
+      <div class="flex flex-col gap-2">
+        <div>Guild's id</div>
         <input
           type="text"
-          class="flex-1"
+          class="flex-1 bg-transparent rounded"
           placeholder="guild_id"
           v-model="form.guild_id"
         />
       </div>
-      <div class="border flex items-center gap-4 p-2 rounded">
-        <div class="w-24 text-right">channel_id:</div>
+      <div class="flex flex-col gap-2">
+        <div>Channel's id</div>
         <input
           type="text"
-          class="flex-1"
+          class="flex-1 bg-transparent rounded"
           placeholder="channel_id"
           v-model="form.channel_id"
         />
       </div>
-      <div class="border flex items-center gap-4 p-2 rounded">
-        <div class="w-24 text-right">token:</div>
+      <div class="flex flex-col gap-2">
+        <div>User Token</div>
         <input
           type="text"
-          class="flex-1"
+          class="flex-1 bg-transparent rounded"
           placeholder="token"
           v-model="form.token"
         />
       </div>
-      <button class="p-1 border rounded">Start</button>
+      <button class="rounded border border-[#6b7280] mt-2 p-2">Start</button>
     </form>
-    <div v-else class="flex items-center justify-center gap-2">
-      <div>current username: {{ mj.user?.username }}</div>
-      <div>remix mode: {{ mj.remix }}</div>
-      <button class="border" @click="mj.ins?.api.info(handleMsg)">/info</button>
-      <button class="border" @click="mj.ins?.api.settings(handleMsg)">
-        /settings
-      </button>
-    </div>
-    <div v-for="(v, k) in mj.mapping" :key="k" class="flex flex-col gap-2">
-      <div v-if="v.content" v-html="marked.parse(v.content)"></div>
-      <img :src="v.url" />
-      <div class="grid grid-cols-5 gap-2">
-        <button
-          v-for="(cv, ci) in v.components"
-          :key="ci"
-          class="flex items-center justify-center border rounded gap-2"
-          @click="handleAction(v.id, cv.custom_id, v.flags!)"
+    <template v-else>
+      <div class="flex flex-col gap-4">
+        <div
+          v-for="(v, k) in mj.mapping"
+          :key="k"
+          class="flex flex-col gap-2 border-l-2 border-yellow-500 py-5 px-16 bg-yellow-500/10"
         >
-          <span>{{ cv.label }}</span>
-          <span>{{ cv.emoji?.name }}</span>
-        </button>
+          <div class="flex flex-col relative">
+            <img
+              src="https://cdn.discordapp.com/avatars/936929561302675456/f6ce562a6b4979c4b1cbc5b436d3be76.webp?size=160"
+              class="w-10 h-10 rounded-full absolute -left-8 top-0 -translate-x-1/2"
+            />
+            <div class="items-end">
+              <span class="hover:underline">Midjourney Bot</span>
+              <span class="text-xs text-gray-400 ml-2">今天14:41</span>
+            </div>
+            <div
+              class="text-sm"
+              v-if="v.content"
+              v-html="marked.parse(v.content)"
+            ></div>
+          </div>
+          <img v-if="v.url" class="w-full md:w-96 rounded-md" :src="v.url" />
+          <div
+            v-if="v.components?.length"
+            class="flex flex-col self-start justify-self-start"
+          >
+            <div
+              class="flex items-center flex-wrap"
+              v-for="(cv, ci) in v.components"
+              :key="ci"
+            >
+              <button
+                v-for="(ccv, cci) in cv.components"
+                :key="cci"
+                class="btn"
+                :data-style="ccv.style"
+                @click="handleAction(v.id, ccv.custom_id, v.flags!)"
+              >
+                <span>{{ ccv.label }}</span>
+                <span>{{ ccv.emoji?.name }}</span>
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
-    <form
-      class="flex items-center gap-2 fixed bottom-0 inset-x-0 m-2 p-2 rounded-lg border"
-      @submit.prevent="handleSubmit"
-    >
-      <textarea
-        v-model="input"
-        ref="textarea"
-        class="flex-1 border p-1 resize-none"
-        placeholder="send an image prompt"
-      ></textarea>
-      <button>Submit</button>
-    </form>
+      <div class="fixed bottom-0 inset-x-0 p-2 bg-transparent">
+        <form
+          class="flex items-center p-2 rounded-lg bg-gray-600 -top-3 relative"
+          @submit.prevent="handleSubmit"
+        >
+          <textarea
+            v-model="input"
+            ref="textarea"
+            class="flex-1 p-1 resize-none bg-transparent outline-none overflow-hidden border-none focus:ring-0"
+            placeholder="send an image prompt"
+          ></textarea>
+          <button class="border-l border-gray-500 text-sm h-6 px-2">
+            Submit
+          </button>
+        </form>
+      </div>
+    </template>
   </div>
 </template>
 
@@ -103,4 +140,8 @@ const handleAction = (id: string, customId: string, flags: number) => {
 }
 </script>
 
-<style scoped></style>
+<style scoped>
+.btn {
+  @apply my-1 mr-2 py-[2px] px-4 rounded text-sm disabled:cursor-not-allowed bg-gray-600 hover:bg-gray-400 transition-all h-8 min-h-[32px] w-[60px] min-w-[60px] data-[style='3']:bg-green-600 data-[style='3']:hover:bg-green-700 data-[style='1']:bg-blue-600 data-[style='1']:hover:bg-blue-700;
+}
+</style>

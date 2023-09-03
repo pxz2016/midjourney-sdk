@@ -22,9 +22,24 @@ router.use(...createProxy('/discordapp', 'https://cdn.discordapp.com'))
 router.use(...createProxy('/discord', 'https://discord.com'))
 // proxy disocrd websokcet
 router.use(
-  ...createProxy('/discordWs', 'wss://gateway.discord.gg', {
+  '/discordWs',
+  createProxyMiddleware({
+    changeOrigin: true,
     ws: true,
-    headers: { Host: 'gateway.discord.gg', Origin: 'https://discord.com' }
+    headers: { Host: 'gateway.discord.gg', Origin: 'https://discord.com' },
+    pathRewrite: { [`^/proxy/discordWs`]: '' },
+    router: (req) => {
+      const searchParams = new URLSearchParams(req.query)
+      if (req.query?.url) {
+        return req.query?.url
+      } else {
+        return `wss://gateway.discord.gg${
+          searchParams.size ? `?${searchParams}` : ''
+        }`
+      }
+    },
+    proxyTimeout: 86400,
+    timeout: 86400
   })
 )
 
