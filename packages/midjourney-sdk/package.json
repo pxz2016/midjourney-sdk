@@ -1,0 +1,41 @@
+{
+  "name": "midjourney-sdk",
+  "version": "3.0.0",
+  "description": "MidJourney in Discord API for Node.js.",
+  "packageManager": "pnpm@7.18.2",
+  "type": "module",
+  "main": "src/index.ts",
+  "keywords": [
+    "midjourney",
+    "midjourney-api",
+    "midjourney-sdk"
+  ],
+  "author": "LaiBaoYuan",
+  "license": "MIT",
+  "homepage": "https://github.com/LaiBaoYuan/midjourney-sdk/#readme",
+  "bugs": {
+    "url": "https://github.com/LaiBaoYuan/midjourney-sdk/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LaiBaoYuan/midjourney-sdk.git"
+  },
+  "scripts": {
+    "dev": "pnpm -F playground dev",
+    "build": "tsc --noEmit && rollup --config rollup.config.ts --configPlugin esbuild",
+    "format": "prettier --check --write ."
+  },
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "eventemitter3": "^5.0.1",
+    "isomorphic-fetch": "^3.0.0",
+    "isomorphic-ws": "^5.0.0",
+    "snowyflake": "^2.0.0"
+  },
+  "files": [
+    "dist"
+  ],
+  "devDependencies": {
+    "@types/isomorphic-fetch": "^0.0.36"
+  }
+}
