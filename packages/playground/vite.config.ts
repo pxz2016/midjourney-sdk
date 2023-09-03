@@ -8,6 +8,7 @@ const root = fileURLToPath(import.meta.url)
 const r = (p: string) => resolve(root, '..', p)
 
 export default defineConfig({
+  base: '/midjourney-sdk',
   plugins: [
     vue(),
     AutoImport({
