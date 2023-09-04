@@ -11,6 +11,10 @@
       >It's useful for you, please give me open source power and support star in
       my `midjourney-sdk` repo.</a
     >
+    <button class="btn" @click="mj.ins?.api.settings(handleMsg)">
+      settings
+    </button>
+    <button class="btn" @click="mj.ins?.api.info(handleMsg)">info</button>
     <form
       v-if="!mj.initialized"
       @submit.prevent="mj.init(form)"
@@ -59,7 +63,9 @@
             />
             <div class="items-end">
               <span class="hover:underline">Midjourney Bot</span>
-              <span class="text-xs text-gray-400 ml-2">今天14:41</span>
+              <span class="text-xs text-gray-400 ml-2">{{
+                dayjs(v.timestamp).format('YYYY-MM-DD hh:mm')
+              }}</span>
             </div>
             <div
               class="text-sm"
@@ -68,11 +74,18 @@
             ></div>
           </div>
           <div
-            v-if="v.error"
-            class="rounded bg-black/70 p-4 border-l-4 border-red-600 flex flex-col gap-2"
+            v-if="v.embed"
+            class="rounded bg-neutral-800 p-4 border-l-4 flex flex-col gap-2"
+            :class="[
+              v.embed.color === 16711680 && 'border-red-600',
+              v.embed.color === 0 && 'border-black'
+            ]"
           >
-            <div>{{ v.error.title }}</div>
-            <div class="text-xs">{{ v.error.description }}</div>
+            <div>{{ v.embed.title }}</div>
+            <div
+              class="text-xs"
+              v-html="marked.marked(v.embed.description, { breaks: true })"
+            ></div>
           </div>
           <img v-if="v.url" class="w-full md:w-96 rounded-md" :src="v.url" />
           <div
@@ -91,8 +104,8 @@
                 :data-style="ccv.style"
                 @click="handleAction(v.id, ccv.custom_id, v.flags!)"
               >
+                <span class="mr-1">{{ ccv.emoji?.name }}</span>
                 <span>{{ ccv.label }}</span>
-                <span>{{ ccv.emoji?.name }}</span>
               </button>
             </div>
           </div>
@@ -119,9 +132,9 @@
 </template>
 
 <script setup lang="ts">
-import { MidJourneyOptions, MessageCallBack, nextNonce } from 'midjourney-sdk'
+import { dayjs } from './utils/dayjs'
+import { MidJourneyOptions, MessageCallBack } from 'midjourney-sdk'
 import * as marked from 'marked'
-
 const { input, textarea } = useTextareaAutosize({ input: '' })
 const mj = useMjStore()
 const form = reactive<MidJourneyOptions>({
@@ -130,10 +143,14 @@ const form = reactive<MidJourneyOptions>({
   channel_id: import.meta.env.VITE_CHANNEL_ID
 })
 
-const handleMsg: MessageCallBack = (msg) => {
-  console.log(msg)
-  if (msg.originId) {
-    delete mj.mapping[msg.originId]
+const handleMsg: MessageCallBack = (type, msg) => {
+  console.log(type, msg)
+  if (
+    msg.parentId &&
+    mj.mapping[msg.parentId]?.progress !== 100 &&
+    msg.progress === 100
+  ) {
+    delete mj.mapping[msg.parentId]
   }
   mj.mapping[msg.id] = msg
 }
@@ -150,6 +167,6 @@ const handleAction = (id: string, customId: string, flags: number) => {
 
 <style scoped>
 .btn {
-  @apply my-1 mr-2 py-[2px] px-4 rounded text-sm disabled:cursor-not-allowed bg-gray-600 hover:bg-gray-400 transition-all h-8 min-h-[32px] w-[60px] min-w-[60px] data-[style='3']:bg-green-600 data-[style='3']:hover:bg-green-700 data-[style='1']:bg-blue-600 data-[style='1']:hover:bg-blue-700 data-[style='4']:bg-red-600 data-[style='4']:hover:bg-red-700;
+  @apply my-1 mr-2 py-[2px] px-4 rounded text-sm disabled:cursor-not-allowed bg-gray-600 hover:bg-gray-400 transition-all h-8 min-h-[32px] w-auto min-w-[60px] data-[style='3']:bg-green-600 data-[style='3']:hover:bg-green-700 data-[style='1']:bg-blue-600 data-[style='1']:hover:bg-blue-700 data-[style='4']:bg-red-600 data-[style='4']:hover:bg-red-700;
 }
 </style>

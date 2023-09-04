@@ -20,10 +20,12 @@ export interface MjEvents {
   WS_OPEN: () => void
   WS_ERROR: (err: WebSocket.ErrorEvent) => void
   WS_CLOSE: (code: number, reason: string) => void
-  [key: number]: (msg: MjMessage) => void
+  [key: number]: (type: MjMsgType, msg: MjMessage) => void
 }
 
 export type MjEventType = keyof MjEvents
+
+export type MjMsgType = 'MESSAGE_CREATE' | 'MESSAGE_UPDATE' | 'MESSAGE_DELETE'
 
 export class MidjourneyWs extends EventEmitter<MjEvents> {
   #ws: WebSocket
@@ -156,13 +158,11 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
     }
   }
 
-  handleMessage(
-    type: 'MESSAGE_CREATE' | 'MESSAGE_UPDATE' | 'MESSAGE_DELETE',
-    message: MjOriginMessage
-  ) {
+  handleMessage(type: MjMsgType, message: MjOriginMessage) {
     if (message.channel_id !== this.opts.channel_id) return
     if (type === 'MESSAGE_CREATE') this.handleMessageCreate(message)
-    else if (type === 'MESSAGE_UPDATE') this.handleMessageUpdate(message)
+    else if (type === 'MESSAGE_UPDATE')
+      this.handleMessageUpdate('MESSAGE_UPDATE', message)
     else this.handleMessageDelete(message)
   }
 
@@ -171,51 +171,76 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
     if (nonce) {
       this.msgMap.updateMsgByNonce(id, nonce)
       if (embeds[0]) {
-        const { color, description, title } = embeds[0]
+        const { color } = embeds[0]
         switch (color) {
           case 16711680:
-            this.emitError(id, embeds[0])
+            this.emitEmbed(id, 'MESSAGE_CREATE', embeds[0])
             break
           default:
             break
         }
       }
     }
-    this.handleMessageUpdate(message)
+    this.handleMessageUpdate('MESSAGE_CREATE', message)
   }
-  handleMessageUpdate(message: MjOriginMessage) {
+  handleMessageUpdate(type: MjMsgType, message: MjOriginMessage) {
     const {
       content,
-      embeds,
       interaction = {} as MjOriginMessage['interaction'],
       nonce,
-      id,
-      components
+      components,
+      embeds,
+      id
     } = message
     if (!nonce) {
       const { name } = interaction
-
-      switch (name) {
-        case 'settings':
-          this.emit('SETTINGS', message)
-          return
-        case 'info':
-          this.emit('INFO', message)
-          return
+      const msg = this.msgMap.getMsgById(id)
+      if (msg && msg.nonce) {
+        switch (name) {
+          case 'settings':
+            this.emitNonce(msg.nonce, type, {
+              id,
+              components,
+              progress: 100
+            })
+            return
+          case 'info':
+            embeds.at(0) &&
+              this.emitNonce(msg.nonce, type, {
+                id,
+                embed: embeds[0],
+                progress: 100
+              })
+            return
+        }
       }
     }
     if (content) {
-      this.processingImage(message)
+      this.processingImage(type, message)
     }
   }
   handleMessageDelete({ id }: MjOriginMessage) {
-    const delMsg = this.msgMap.delMsgById(id)
-    delMsg &&
-      delMsg.nonce &&
-      this.emit(parseInt(delMsg.nonce), { ...delMsg, progress: 100 })
+    // const delMsg = this.msgMap.delMsgById(id)
+    // delMsg &&
+    //   delMsg.nonce &&
+    //   this.emit(parseInt(delMsg.nonce), { ...delMsg, progress: 100 })
+    this.emitNonce(id, 'MESSAGE_DELETE', { progress: 100 })
   }
 
-  processingImage(message: MjOriginMessage) {
+  emitNonce(idOrNonce: string, type: MjMsgType, msg: Partial<MjMessage>) {
+    const oldMsg =
+      this.msgMap.get(idOrNonce) ||
+      this.msgMap.getMsgById(idOrNonce) ||
+      this.msgMap.getMsgByparentId(idOrNonce)
+    if (type === 'MESSAGE_DELETE') {
+      console.log(oldMsg)
+    }
+    oldMsg &&
+      oldMsg.nonce &&
+      this.emit(parseInt(oldMsg.nonce), type, Object.assign({}, oldMsg, msg))
+  }
+
+  processingImage(type: MjMsgType, message: MjOriginMessage) {
     const {
       content,
       id,
@@ -226,12 +251,12 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
       timestamp,
       message_reference = {} as MjOriginMessage['message_reference']
     } = message
+    const { message_id: parentId } = message_reference
     let msg = this.msgMap.getMsgById(id)
-    let jobNonce = msg?.nonce || getContentNonce(content)
+    let parentMsg = this.msgMap.getMsgById(parentId)
+    let jobNonce = msg?.nonce || parentMsg?.nonce
+    console.log(jobNonce, 'emitNonce')
     if (!jobNonce) return
-    if (!msg) {
-      msg = this.msgMap.get(jobNonce)
-    }
     let url = attachments.at(0)?.url
     if (url && this.opts.imgBaseUrl) {
       url = url.replace('https://cdn.discordapp.com', this.opts.imgBaseUrl)
@@ -243,11 +268,9 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
       : progressMatch
       ? parseInt(progressMatch)
       : 0
-    const { message_id: parentId } = message_reference
     const mjMsg = JSON.parse(
       JSON.stringify({
         id,
-        originId: msg && msg.id !== message.id ? msg.id : undefined,
         url,
         content,
         parentId,
@@ -257,14 +280,14 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
         timestamp
       })
     )
-    this.emit(parseInt(jobNonce), mjMsg)
+    this.emitNonce(jobNonce, type, mjMsg)
   }
 
-  emitError(id: string, error: MjMessage['error']) {
+  emitEmbed(id: string, type: MjMsgType, embed: MjMessage['embed']) {
     const msg = this.msgMap.getMsgById(id)
-    if (!msg) return
-    msg.error = error
-    this.emit(parseInt(msg.nonce!), msg)
+    if (!msg || !msg.nonce) return
+    msg.embed = embed
+    this.emitNonce(msg.nonce, type, msg)
   }
 
   waitReady() {
@@ -275,15 +298,25 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
 
   waitImageMessage({
     nonce,
+    parentId,
     cb
   }: {
     nonce: string
-    cb: (msg: MjMessage) => void
+    parentId?: string
+    cb?: MessageCallBack
   }) {
     this.msgMap.set(nonce, { id: '', nonce })
+    const parentMsg = parentId && this.msgMap.getMsgById(parentId)
     return new Promise<MjMessage>((s, j) => {
-      this.on(parseInt(nonce), (msg) => {
-        cb(msg)
+      parentMsg &&
+        parentMsg.nonce &&
+        this.once(parseInt(parentMsg.nonce), (type, msg) => {
+          console.log(msg, 'parentMsg')
+          cb?.(type, msg)
+        })
+      this.on(parseInt(nonce), (type, msg) => {
+        console.log(msg, 'msg')
+        cb?.(type, msg)
         this.msgMap.set(nonce, msg)
         if (msg.error) {
           this.off(parseInt(nonce))
@@ -295,36 +328,6 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
           s(msg)
           return
         }
-      })
-    })
-  }
-
-  waitSetting(cb?: MessageCallBack) {
-    return new Promise<MjMessage>((s) => {
-      this.once('SETTINGS', ({ id, components }) => {
-        cb?.({
-          id,
-          components: formatComponents(components)
-        })
-        s({
-          id,
-          components: formatComponents(components)
-        })
-      })
-    })
-  }
-
-  waitInfo(cb?: MessageCallBack) {
-    return new Promise<MjMessage>((s) => {
-      this.once('INFO', ({ id, embeds }) => {
-        cb?.({
-          id,
-          content: embeds.at(0)?.description
-        })
-        s({
-          id,
-          content: embeds.at(0)?.description
-        })
       })
     })
   }

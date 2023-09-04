@@ -1,5 +1,5 @@
 import { debug } from './utils'
-import { MidjourneyWs } from './ws'
+import { MidjourneyWs, MjMsgType } from './ws'
 
 export type InitStatus = 'not_initialized' | 'initializing' | 'initialized'
 
@@ -80,15 +80,16 @@ export interface MjMessage {
   flags?: number
   content?: string
   url?: string
-  error?: MjOriginMessage['embeds'][number]
+  embed?: MjOriginMessage['embeds'][number]
   progress?: number
   components?: MjOriginMessage['components']
   originId?: string
   parentId?: string
   deleted?: boolean
+  timestamp?: string
   [key: string]: any
 }
 
 export interface MessageCallBack {
-  (msg: MjMessage): void
+  (type: MjMsgType, msg: MjMessage): void
 }

@@ -42,7 +42,7 @@ export class MidjourneyApi extends MidjourneyCommand {
     )
   }
 
-  async imagine(value: string, cb: (msg: MjMessage) => void) {
+  async imagine(value: string, cb?: MessageCallBack) {
     const nonce = nextNonce()
     value = `nonce: ${nonce}, ${value}`
     return this.getCommand('imagine').then((command) => {
@@ -65,7 +65,7 @@ export class MidjourneyApi extends MidjourneyCommand {
     message_id: string,
     custom_id: string,
     message_flags: number,
-    cb: (msg: MjMessage) => void
+    cb?: MessageCallBack
   ) {
     const payload = this.getPayload(
       3,
@@ -80,26 +80,32 @@ export class MidjourneyApi extends MidjourneyCommand {
     )
     return Promise.all([
       this.interactions(payload),
-      this.opts.ws?.waitImageMessage({ nonce: payload.nonce, cb })
+      this.opts.ws?.waitImageMessage({
+        nonce: payload.nonce,
+        cb,
+        parentId: message_id
+      })
     ]).then(([_, res]) => res)
   }
 
   info(cb?: MessageCallBack) {
-    return this.getCommand('info').then((command) =>
-      Promise.all([
-        this.interactions(this.getPayload(2, command)),
-        this.opts.ws?.waitInfo(cb)
+    return this.getCommand('info').then((command) => {
+      const payload = this.getPayload(2, command)
+      return Promise.all([
+        this.interactions(payload),
+        this.opts.ws?.waitImageMessage({ nonce: payload.nonce, cb })
       ]).then(([_, msg]) => msg)
-    )
+    })
   }
 
   settings(cb?: MessageCallBack) {
-    return this.getCommand('settings').then((command) =>
-      Promise.all([
-        this.interactions(this.getPayload(2, command)),
-        this.opts.ws?.waitSetting(cb)
+    return this.getCommand('settings').then((command) => {
+      const payload = this.getPayload(2, command)
+      return Promise.all([
+        this.interactions(payload),
+        this.opts.ws?.waitImageMessage({ nonce: payload.nonce, cb })
       ]).then(([_, msg]) => msg)
-    )
+    })
   }
 
   fast() {
