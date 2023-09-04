@@ -38,7 +38,7 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
   }
 
   #connect() {
-    console.log(this.opts.wsBaseUrl)
+    if (!this.opts.wsBaseUrl) throw new Error("wsBaseUrl can't be empty")
     const ws = new WebSocket(this.opts.wsBaseUrl)
     ws.addEventListener('open', () => {
       this.emit('WS_OPEN')
@@ -148,7 +148,6 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
       type === 'MESSAGE_DELETE'
     ) {
       console.log(data)
-
       this.handleMessage(type, data)
     }
     if (operate === 11) {
@@ -217,8 +216,16 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
   }
 
   processingImage(message: MjOriginMessage) {
-    const { content, id, attachments, flags, components, nonce, timestamp } =
-      message
+    const {
+      content,
+      id,
+      attachments,
+      flags,
+      components,
+      nonce,
+      timestamp,
+      message_reference = {} as MjOriginMessage['message_reference']
+    } = message
     let msg = this.msgMap.getMsgById(id)
     let jobNonce = msg?.nonce || getContentNonce(content)
     if (!jobNonce) return
@@ -236,19 +243,21 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
       : progressMatch
       ? parseInt(progressMatch)
       : 0
+    const { message_id: parentId } = message_reference
     const mjMsg = JSON.parse(
       JSON.stringify({
         id,
         originId: msg && msg.id !== message.id ? msg.id : undefined,
         url,
         content,
+        parentId,
         flags,
         components,
         progress,
         timestamp
       })
     )
-    this.emit(parseInt(jobNonce), mjMsg) && this.msgMap.set(jobNonce, mjMsg)
+    this.emit(parseInt(jobNonce), mjMsg)
   }
 
   emitError(id: string, error: MjMessage['error']) {
@@ -275,6 +284,7 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
     return new Promise<MjMessage>((s, j) => {
       this.on(parseInt(nonce), (msg) => {
         cb(msg)
+        this.msgMap.set(nonce, msg)
         if (msg.error) {
           this.off(parseInt(nonce))
           j(msg.error)

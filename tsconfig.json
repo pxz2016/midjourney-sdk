@@ -8,7 +8,6 @@
     "baseUrl": ".",
     "rootDir": ".",
     "paths": {
-      "@midjourney-sdk/*": ["packages/*/src"],
       "midjourney-sdk": ["packages/midjourney-sdk/src"]
     },
     "moduleResolution": "Node",

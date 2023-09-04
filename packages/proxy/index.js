@@ -26,7 +26,10 @@ router.use(
   createProxyMiddleware({
     changeOrigin: true,
     ws: true,
-    headers: { Host: 'gateway.discord.gg', Origin: 'https://discord.com' },
+    headers: {
+      Host: 'gateway.discord.gg',
+      Origin: 'https://discord.com'
+    },
     pathRewrite: { [`^/proxy/discordWs`]: '' },
     router: (req) => {
       const searchParams = new URLSearchParams(req.query)
@@ -37,9 +40,7 @@ router.use(
           searchParams.size ? `?${searchParams}` : ''
         }`
       }
-    },
-    proxyTimeout: 86400,
-    timeout: 86400
+    }
   })
 )
 

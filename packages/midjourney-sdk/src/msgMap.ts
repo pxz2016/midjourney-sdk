@@ -14,7 +14,7 @@ export class MidjourneyMsgMap extends Map<MjOriginMessage['nonce'], MjMessage> {
   delMsgById(id: string) {
     let msg = this.getMsgById(id)
     if (msg) {
-      this.delete(msg.nonce)
+      msg.deleted = true
       return msg
     }
   }

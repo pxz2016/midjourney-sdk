@@ -2,6 +2,7 @@
   <div
     class="pb-[10vh] pt-5 bg-gray-950/80 text-white h-full w-full relative overflow-auto"
   >
+    <img src="/mj.png" class="w-16 h-16 rounded-full m-auto mb-5" />
     <h1 class="text-center text-2xl font-bold">Midjourney-SDK Example</h1>
     <a
       href="https://github.com/LaiBaoYuan/midjourney-sdk"
@@ -53,7 +54,7 @@
         >
           <div class="flex flex-col relative">
             <img
-              src="https://cdn.discordapp.com/avatars/936929561302675456/f6ce562a6b4979c4b1cbc5b436d3be76.webp?size=160"
+              src="/mj.png"
               class="w-10 h-10 rounded-full absolute -left-8 top-0 -translate-x-1/2"
             />
             <div class="items-end">
@@ -65,6 +66,13 @@
               v-if="v.content"
               v-html="marked.parse(v.content)"
             ></div>
+          </div>
+          <div
+            v-if="v.error"
+            class="rounded bg-black/70 p-4 border-l-4 border-red-600 flex flex-col gap-2"
+          >
+            <div>{{ v.error.title }}</div>
+            <div class="text-xs">{{ v.error.description }}</div>
           </div>
           <img v-if="v.url" class="w-full md:w-96 rounded-md" :src="v.url" />
           <div
@@ -111,7 +119,7 @@
 </template>
 
 <script setup lang="ts">
-import { MidJourneyOptions, MessageCallBack } from 'midjourney-sdk'
+import { MidJourneyOptions, MessageCallBack, nextNonce } from 'midjourney-sdk'
 import * as marked from 'marked'
 
 const { input, textarea } = useTextareaAutosize({ input: '' })
@@ -142,6 +150,6 @@ const handleAction = (id: string, customId: string, flags: number) => {
 
 <style scoped>
 .btn {
-  @apply my-1 mr-2 py-[2px] px-4 rounded text-sm disabled:cursor-not-allowed bg-gray-600 hover:bg-gray-400 transition-all h-8 min-h-[32px] w-[60px] min-w-[60px] data-[style='3']:bg-green-600 data-[style='3']:hover:bg-green-700 data-[style='1']:bg-blue-600 data-[style='1']:hover:bg-blue-700;
+  @apply my-1 mr-2 py-[2px] px-4 rounded text-sm disabled:cursor-not-allowed bg-gray-600 hover:bg-gray-400 transition-all h-8 min-h-[32px] w-[60px] min-w-[60px] data-[style='3']:bg-green-600 data-[style='3']:hover:bg-green-700 data-[style='1']:bg-blue-600 data-[style='1']:hover:bg-blue-700 data-[style='4']:bg-red-600 data-[style='4']:hover:bg-red-700;
 }
 </style>

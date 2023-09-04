@@ -67,6 +67,7 @@ export interface MjOriginMessage {
     type: string
     footer: { text: string }
   }[]
+  message_reference: { message_id: string }
   nonce?: string
   heartbeat_interval?: number
   session_id?: string
@@ -83,6 +84,8 @@ export interface MjMessage {
   progress?: number
   components?: MjOriginMessage['components']
   originId?: string
+  parentId?: string
+  deleted?: boolean
   [key: string]: any
 }
 

@@ -13,6 +13,8 @@ export class MidJourney {
     this.opts = Object.assign(defaultOpts, opts, {
       initialize: 'not_initialized'
     }) as MidJourneyFullOptions
+    if (!this.opts.apiBaseUrl) throw new Error("apiBaseUrl can't be empty")
+    if (!this.opts.wsBaseUrl) throw new Error("wsBaseUrl can't be empty")
     this.api = new MidjourneyApi(this.opts)
   }
 
@@ -21,14 +23,6 @@ export class MidJourney {
       this.opts.initialize = 'initializing'
       this.opts.ws = new MidjourneyWs(this.opts)
       await this.opts.ws.waitReady()
-      const settings = await this.api.settings()
-      if (
-        settings?.components?.find((v) => v.label === 'Remix mode')?.style === 3
-      ) {
-        this.opts.remix = true
-      } else {
-        this.opts.remix = false
-      }
       this.opts.initialize = 'initialized'
       s(this)
     })
