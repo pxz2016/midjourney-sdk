@@ -1,5 +1,5 @@
 import { debug } from './utils'
-import { MidjourneyWs, MjMsgType } from './ws'
+import { MidjourneyWs } from './ws'
 
 export type InitStatus = 'not_initialized' | 'initializing' | 'initialized'
 
@@ -50,6 +50,7 @@ export interface MjOriginMessage {
   id: string
   flags: number
   content: string
+  type: 0 | 19 | 20
   components: { components: any[] }[]
   attachments: {
     filename: string
@@ -93,3 +94,12 @@ export interface MjMessage {
 export interface MessageCallBack {
   (type: MjMsgType, msg: MjMessage): void
 }
+
+export interface MjEvents extends Record<string, MessageCallBack> {
+  READY: (user: MjOriginMessage['user']) => void
+  WS_OPEN: () => void
+  WS_ERROR: (error: string) => void
+  WS_CLOSE: () => void
+}
+
+export type MjMsgType = 'MESSAGE_CREATE' | 'MESSAGE_UPDATE' | 'MESSAGE_DELETE'

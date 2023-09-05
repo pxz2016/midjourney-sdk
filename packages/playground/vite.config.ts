@@ -18,7 +18,14 @@ export default defineConfig({
     ElementPlus({}),
     AutoImport({
       resolvers: [ElementPlusResolver()],
-      imports: ['vue', 'pinia', '@vueuse/core'],
+      imports: [
+        'vue',
+        'pinia',
+        '@vueuse/core',
+        {
+          'element-plus': ['ElMessage', 'ElMessageBox', 'ElLoading']
+        }
+      ],
       dirs: [r('src/stores')],
       dts: 'src/types/auto-import.d.ts'
     }),

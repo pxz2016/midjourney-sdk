@@ -1,6 +1,6 @@
-import { MjMessage, MjOriginMessage } from './types'
+import { MjMessage } from './types'
 
-export class MidjourneyMsgMap extends Map<MjOriginMessage['nonce'], MjMessage> {
+export class MidjourneyMsgMap extends Map<MjMessage['nonce'], MjMessage> {
   updateMsgByNonce(id: string, nonce: string) {
     let msg = this.get(nonce)
     if (!msg) return
@@ -14,6 +14,20 @@ export class MidjourneyMsgMap extends Map<MjOriginMessage['nonce'], MjMessage> {
   getMsgByparentId(parentId: string) {
     return Array.from(this.entries()).find(
       ([_, v]) => v.parentId === parentId
+    )?.[1]
+  }
+
+  getMsgByOriginId(originId: string) {
+    return Array.from(this.entries()).find(
+      ([_, v]) => v.originId === originId
+    )?.[1]
+  }
+
+  getMsgByContent(content: string, progress = 93) {
+    const RE = /\*\*(.+?)\*\*/
+    const match = content?.match(RE)
+    return Array.from(this.entries()).find(
+      ([_, v]) => match && match[1] === v.prompt
     )?.[1]
   }
 
