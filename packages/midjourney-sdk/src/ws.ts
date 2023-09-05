@@ -9,6 +9,7 @@ import {
   MjOriginMessage
 } from './types'
 import { MidjourneyMsgMap } from './msgMap'
+import { v4 as uuid } from 'uuid'
 
 export class MidjourneyWs extends EventEmitter<MjEvents> {
   #ws: WebSocket
@@ -101,7 +102,7 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
   #message(e: WebSocket.MessageEvent) {
     const payload = JSON.parse(e.data as string)
     const data = payload.d as MjOriginMessage
-    const type = payload.t as string
+    const type = payload.t as MjMsgType
     const seq = payload.s as number
     const operate = payload.op as number
     seq && (this.#lastSequence = seq)
@@ -130,10 +131,11 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
     if (
       type === 'MESSAGE_CREATE' ||
       type === 'MESSAGE_UPDATE' ||
-      type === 'MESSAGE_DELETE'
+      type === 'MESSAGE_DELETE' ||
+      type === 'INTERACTION_IFRAME_MODAL_CREATE'
     ) {
-      console.log(data);
-      // this.handleMessage(type, data)
+      console.log(data)
+      this.handleMessage(type, data)
     }
     if (operate === 11) {
       !this.opts.skipHeartbeat &&
@@ -143,25 +145,35 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
 
   handleMessage(type: MjMsgType, message: MjOriginMessage) {
     if (message.channel_id !== this.opts.channel_id) return
-    if (type === 'MESSAGE_CREATE') this.handleMessageCreate(message)
+    if (type === 'MESSAGE_CREATE' || type === 'INTERACTION_IFRAME_MODAL_CREATE')
+      this.handleMessageCreate(type, message)
     else if (type === 'MESSAGE_UPDATE')
       this.handleMessageUpdate('MESSAGE_UPDATE', message)
     else this.handleMessageDelete(message)
   }
 
-  handleMessageCreate(message: MjOriginMessage) {
-    const { nonce, id, embeds } = message
+  handleMessageCreate(type: MjMsgType, message: MjOriginMessage) {
+    const { nonce, id, embeds, custom_id } = message
     if (nonce) {
       this.msgMap.updateMsgByNonce(id, nonce)
-      if (embeds[0]) {
-        const { color } = embeds[0]
-        switch (color) {
-          case 16711680:
-            this.emitEmbed(id, 'MESSAGE_CREATE', embeds[0])
-            break
-          default:
-            break
-        }
+      // if (embeds[0]) {
+      //   const { color } = embeds[0]
+      //   switch (color) {
+      //     case 16711680:
+      //       this.emitEmbed(id, 'MESSAGE_CREATE', embeds[0])
+      //       break
+      //     default:
+      //       break
+      //   }
+      // }
+      if (type === 'INTERACTION_IFRAME_MODAL_CREATE') {
+        this.emitNonce(nonce, type, {
+          iframeUrl: `https://936929561302675456.discordsays.com/inpaint/index.html?instance_id=${
+            this.opts.channel_id
+          }:936929561302675456:${custom_id}&custom_id=${custom_id}&channel_id=${
+            this.opts.channel_id
+          }&guild_id=${this.opts.guild_id}&frame_id=${uuid()}&platform=desktop`
+        })
       }
     }
     this.handleMessageUpdate('MESSAGE_CREATE', message)
@@ -176,29 +188,29 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
       embeds,
       id
     } = message
-    if (!nonce) {
-      const { name } = interaction
-      const msg = this.msgMap.getMsgById(id)
-      if (msg && msg.nonce) {
-        switch (name) {
-          case 'settings':
-            this.emitNonce(msg.nonce, type, {
-              id,
-              components,
-              progress: 100
-            })
-            return
-          case 'info':
-            embeds.at(0) &&
-              this.emitNonce(msg.nonce, type, {
-                id,
-                embed: embeds[0],
-                progress: 100
-              })
-            return
-        }
-      }
-    }
+    // if (!nonce) {
+    //   const { name } = interaction
+    //   const msg = this.msgMap.getMsgById(id)
+    //   if (msg && msg.nonce) {
+    //     switch (name) {
+    //       case 'settings':
+    //         this.emitNonce(msg.nonce, type, {
+    //           id,
+    //           components,
+    //           progress: 100
+    //         })
+    //         return
+    //       case 'info':
+    //         embeds.at(0) &&
+    //           this.emitNonce(msg.nonce, type, {
+    //             id,
+    //             embed: embeds[0],
+    //             progress: 100
+    //           })
+    //         return
+    //     }
+    //   }
+    // }
     if (content) {
       this.processingImage(type, message)
     }
@@ -220,8 +232,11 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
       message_reference = {} as MjOriginMessage['message_reference']
     } = message
     const { message_id: parentId } = message_reference
-    let msg = this.msgMap.getMsgById(id) || this.msgMap.getMsgById(parentId)
-    console.log(msg, 'msg', message)
+    let msg =
+      this.msgMap.getMsgById(id) ||
+      (parentId
+        ? this.msgMap.getMsgByparentId(parentId)
+        : this.msgMap.getMsgByContent(content))
     if (!msg?.nonce) return
     let url = attachments.at(0)?.url
     if (url && this.opts.imgBaseUrl) {
@@ -241,25 +256,22 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
         url,
         originId,
         content,
-        parentId: originId ? undefined : msg?.originId ? undefined : parentId,
+        parentId,
         flags,
         components,
         progress,
         timestamp
       })
     )
-    // console.log(mjMsg, 'originId')
-    // if (parentId) {
-    //   let test1 = this.msgMap.getMsgByparentId(parentId)
-    //   if (test1 && test1.id !== id) {
-    //     console.log(test1)
-    //     this.msgMap.set(test1.nonce, mjMsg)
-    //   }
-    // }
     this.emitNonce(msg.nonce, type, mjMsg)
   }
 
-  emitNonce(idOrNonce: string, type: MjMsgType, msg: MjMessage, isDel = false) {
+  emitNonce(
+    idOrNonce: string,
+    type: MjMsgType,
+    msg: Partial<MjMessage>,
+    isDel = false
+  ) {
     const emitMsg =
       this.msgMap.get(idOrNonce) ||
       this.msgMap.getMsgById(idOrNonce) ||
@@ -269,7 +281,7 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
       this.emit(
         emitMsg.nonce,
         type,
-        isDel ? msg : Object.assign({}, emitMsg, msg)
+        isDel ? (msg as MjMessage) : Object.assign({}, emitMsg, msg)
       )
   }
 
@@ -300,21 +312,19 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
     return new Promise<MjMessage>((s, j) => {
       parentMsg &&
         parentMsg.nonce &&
-        this.on(parentMsg.nonce, (type, msg) => {
-          // console.log(msg, 'parentMsg')
+        this.once(parentMsg.nonce, (type, msg) => {
           cb?.(type, msg)
-          if (msg.id != parentMsg.id) {
-            console.log(msg, 'parentMsg off')
-            this.off(parentMsg.nonce!)
-          } else {
-            this.msgMap.set(msg.nonce, msg)
-          }
+          this.off(parentMsg.nonce!)
         })
       this.on(nonce, (type, msg) => {
         cb?.(type, msg)
         if (type === 'MESSAGE_DELETE' && msg.id) {
           const final = this.msgMap.getMsgByOriginId(msg.id)
           final && this.off(nonce) && s(final)
+          return
+        }
+        if (type === 'INTERACTION_IFRAME_MODAL_CREATE') {
+          this.off(nonce)
           return
         }
         this.msgMap.set(nonce, msg)

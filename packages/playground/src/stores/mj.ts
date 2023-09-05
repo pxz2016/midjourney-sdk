@@ -29,11 +29,12 @@ export const useMjStore = defineStore('midjourney', {
     },
     handleMsg(type: MjMsgType, msg: MjMessage) {
       console.log(
-        `消息类型: ${type}, 事件ID: ${msg.nonce}, 消息ID: ${msg.id}, 父级ID: ${msg.parentId}, 进度: ${msg.progress}`,
-        msg
+        `消息类型: ${type}, 事件ID: ${msg.nonce}, 消息ID: ${msg.id}, 父级ID: ${msg.parentId}, 进度: ${msg.progress}`
       )
       if (type === 'MESSAGE_DELETE') {
         delete this.mapping[msg.id]
+      } else if (type === 'INTERACTION_IFRAME_MODAL_CREATE') {
+        console.log(msg)
       } else {
         this.mapping[msg.id] = msg
       }

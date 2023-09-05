@@ -73,6 +73,8 @@ export interface MjOriginMessage {
   heartbeat_interval?: number
   session_id?: string
   user?: any
+  // Vary (Region)
+  custom_id?: string
 }
 
 export interface MjMessage {
@@ -88,6 +90,7 @@ export interface MjMessage {
   parentId?: string
   deleted?: boolean
   timestamp?: string
+  iframeUrl?: string
   [key: string]: any
 }
 
@@ -102,4 +105,11 @@ export interface MjEvents extends Record<string, MessageCallBack> {
   WS_CLOSE: () => void
 }
 
-export type MjMsgType = 'MESSAGE_CREATE' | 'MESSAGE_UPDATE' | 'MESSAGE_DELETE'
+export type MjMsgType =
+  | 'READY'
+  | 'MESSAGE_CREATE'
+  | 'MESSAGE_UPDATE'
+  | 'MESSAGE_DELETE'
+  | 'INTERACTION_CREATE'
+  | 'INTERACTION_SUCCESS'
+  | 'INTERACTION_IFRAME_MODAL_CREATE'

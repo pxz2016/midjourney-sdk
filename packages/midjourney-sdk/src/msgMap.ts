@@ -13,7 +13,7 @@ export class MidjourneyMsgMap extends Map<MjMessage['nonce'], MjMessage> {
 
   getMsgByparentId(parentId: string) {
     return Array.from(this.entries()).find(
-      ([_, v]) => v.parentId === parentId
+      ([_, v]) => v.parentId === parentId && v.progress !== 100
     )?.[1]
   }
 
@@ -23,11 +23,12 @@ export class MidjourneyMsgMap extends Map<MjMessage['nonce'], MjMessage> {
     )?.[1]
   }
 
-  getMsgByContent(content: string, progress = 93) {
+  getMsgByContent(content: string) {
     const RE = /\*\*(.+?)\*\*/
     const match = content?.match(RE)
     return Array.from(this.entries()).find(
-      ([_, v]) => match && match[1] === v.prompt
+      ([_, v]) =>
+        match && match[1] === v.content?.match(RE)?.[1] && v.progress !== 100
     )?.[1]
   }
 

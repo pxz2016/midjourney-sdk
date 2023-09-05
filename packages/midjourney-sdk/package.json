@@ -32,12 +32,14 @@
     "eventemitter3": "^5.0.1",
     "isomorphic-fetch": "^3.0.0",
     "isomorphic-ws": "^5.0.0",
-    "snowyflake": "^2.0.0"
+    "snowyflake": "^2.0.0",
+    "uuid": "^9.0.0"
   },
   "files": [
     "dist"
   ],
   "devDependencies": {
-    "@types/isomorphic-fetch": "^0.0.36"
+    "@types/isomorphic-fetch": "^0.0.36",
+    "@types/uuid": "^9.0.3"
   }
 }
