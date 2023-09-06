@@ -32,6 +32,12 @@ export class MidjourneyMsgMap extends Map<MjMessage['nonce'], MjMessage> {
     )?.[1]
   }
 
+  getVaryMsgByContent(content: string) {
+    const RE = /\*\*regionNonce:\s(\d+?),\s/
+    const regionNonce = content?.match(RE)?.[1]
+    return this.get(regionNonce)
+  }
+
   delMsgById(id: string) {
     let msg = this.getMsgById(id)
     if (msg) {

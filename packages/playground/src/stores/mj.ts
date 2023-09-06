@@ -10,11 +10,13 @@ export const useMjStore = defineStore('midjourney', {
     ins: null as MidJourney | null,
     user: null as any,
     mapping: {} as Record<MjMessage['id'], MjMessage>,
-    iframeUrl: '',
-    openIframe: true
+    varyRegionInfo: {
+      varyRegionImgBase64: '',
+      varyRegionCustomId: ''
+    },
+    openIframe: false
   }),
   getters: {
-    isOpenIframe: ({ iframeUrl }) => !!iframeUrl,
     remix: ({ ins }) => (ins?.opts.remix ? 'yes' : 'no'),
     user: ({ ins }) => ins?.opts.user,
     initialized: ({ ins }) => ins?.opts.initialize === 'initialized'
@@ -38,7 +40,10 @@ export const useMjStore = defineStore('midjourney', {
         delete this.mapping[msg.id]
       } else if (type === 'INTERACTION_IFRAME_MODAL_CREATE') {
         console.log(msg)
-        msg.iframeUrl && (this.iframeUrl = msg.iframeUrl)
+        msg.varyRegionImgBase64 &&
+          (this.varyRegionInfo.varyRegionImgBase64 = msg.varyRegionImgBase64)
+        msg.varyRegionCustomId &&
+          (this.varyRegionInfo.varyRegionCustomId = msg.varyRegionCustomId)
         this.openIframe = true
       } else {
         this.mapping[msg.id] = msg

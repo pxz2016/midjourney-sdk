@@ -16,13 +16,13 @@
 </template>
 
 <script setup lang="ts">
+const mj = useMjStore()
 const editor = ref<HTMLCanvasElement>()
 const ctx = computed(() => editor.value?.getContext('2d'))
 let baseImage = new Image()
 let maskImage = new Image()
-baseImage.src = './0_0.webp'
+baseImage.src = mj.varyRegionInfo.varyRegionImgBase64
 maskImage.src = './checkerboard.png'
-const factor = ref(0)
 const isDrawing = ref(false)
 const base64 = ref('')
 const position = reactive({
@@ -119,6 +119,12 @@ const toDataURL = () => {
       )
     }
     base64.value = editor.value.toDataURL('image/png')
+    mj.ins?.api.varyRegion(
+      mj.varyRegionInfo.varyRegionCustomId,
+      'orange',
+      base64.value,
+      mj.handleMsg
+    )
   }
 }
 

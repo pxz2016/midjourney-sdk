@@ -30,7 +30,13 @@
       </div>
       <Footer />
     </template>
-    <el-dialog v-model="mj.openIframe" fullscreen title="Tips" width="50%">
+    <el-dialog
+      v-if="mj.openIframe"
+      v-model="mj.openIframe"
+      fullscreen
+      title="Tips"
+      width="50%"
+    >
       <div class="flex items-center justify-center">
         <InpaintingEditor />
       </div>
@@ -42,8 +48,7 @@
 
 <script setup lang="ts">
 import { FormRules, FormInstance } from 'element-plus'
-import { MidJourneyOptions, nextNonce } from 'midjourney-sdk'
-console.log(nextNonce())
+import { MidJourneyOptions } from 'midjourney-sdk'
 
 const mj = useMjStore()
 const formRef = ref<FormInstance>()
@@ -62,7 +67,7 @@ const rules = reactive<FormRules>({
     { required: true, message: 'please input your token', trigger: 'blur' }
   ]
 })
-const isOpenIframe = ref(true)
+
 const form = reactive<MidJourneyOptions>({
   token: import.meta.env.VITE_TOKEN,
   guild_id: import.meta.env.VITE_GUILD_ID,
@@ -76,15 +81,4 @@ const handleLogin = () => {
     }
   })
 }
-
-useEventListener('message', (e) => {
-  if (e.origin === 'https://936929561302675456.discordsays.com') {
-    const [op, { nonce }] = e.data as any[]
-    console.log(e)
-    if (op === 2 && nonce) {
-      mj.iframeUrl = ''
-      mj.ins?.api.varyRegion(nonce, mj.handleMsg)
-    }
-  }
-})
 </script>

@@ -18,6 +18,7 @@ export interface MidJourneyFullOptions {
   ws?: MidjourneyWs
   user?: MjOriginMessage['user']
   initialize: InitStatus
+  discordsaysUrl: string
 }
 
 export type MidJourneyOptions = Pick<
@@ -34,6 +35,7 @@ export type MidJourneyOptions = Pick<
       | 'ws'
       | 'user'
       | 'initialize'
+      | 'discordsaysUrl'
     >
   >
 
@@ -90,7 +92,8 @@ export interface MjMessage {
   parentId?: string
   deleted?: boolean
   timestamp?: string
-  iframeUrl?: string
+  varyRegionCustomId?: string
+  varyRegionImgBase64?: string
   [key: string]: any
 }
 

@@ -8,5 +8,9 @@ export const defaultOpts = {
   imgBaseUrl: 'https://cdn.discordapp.com',
   debug,
   fetch,
-  skipHeartbeat: false
+  skipHeartbeat: false,
+  discordsaysUrl:
+    typeof document === 'undefined'
+      ? 'https://936929561302675456.discordsays.com'
+      : ''
 } as MidJourneyOptions

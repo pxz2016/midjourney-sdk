@@ -42,6 +42,27 @@ export class MidjourneyApi extends MidjourneyCommand {
     )
   }
 
+  private inpaint(customId: string, prompt: string, mask: string) {
+    const headers = {
+      'Content-Type': 'application/json'
+    }
+    return this.opts.fetch(
+      `${this.opts.discordsaysUrl}/inpaint/api/submit-job`,
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          customId,
+          prompt,
+          mask: mask.replace(/^data:.+?;base64,/, ''),
+          userId: '0',
+          username: '0',
+          full_prompt: null
+        }),
+        headers
+      }
+    )
+  }
+
   async imagine(value: string, cb?: MessageCallBack) {
     return this.getCommand('imagine').then((command) => {
       const payload = this.getPayload(
@@ -103,12 +124,17 @@ export class MidjourneyApi extends MidjourneyCommand {
     ]).then(([_, res]) => res)
   }
 
-  varyRegion(nonce: string, cb?: MessageCallBack) {
-    console.log(nonce)
-    return this.opts.ws?.waitMessage({
-      nonce,
-      cb
-    })
+  varyRegion(
+    customId: string,
+    prompt: string,
+    mask: string,
+    cb?: MessageCallBack
+  ) {
+    const nonce = nextNonce()
+    return Promise.all([
+      this.inpaint(customId, `regionNonce: ${nonce}, ${prompt}`, mask),
+      this.opts.ws?.waitMessage({ nonce, cb })
+    ]).then(([_, msg]) => msg)
   }
 
   info(cb?: MessageCallBack) {

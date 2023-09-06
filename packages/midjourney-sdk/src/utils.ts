@@ -26,3 +26,6 @@ export const formatComponents = (components: MjOriginMessage['components']) => {
 
 export const getContentNonce = (content: string) =>
   content.match(/\*\*nonce:\s(\d+?),\s/)?.[1]
+
+export const matchRegionNonce = (content: string) =>
+  content.match(/\*\*regionNonce:\s(\d+?),\s/)?.[1]

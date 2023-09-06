@@ -42,5 +42,13 @@ export default defineConfig({
   },
   resolve: {
     alias: { '@': r('src') }
+  },
+  server: {
+    proxy: {
+      '/inpaint': {
+        target: 'https://936929561302675456.discordsays.com',
+        changeOrigin: true
+      }
+    }
   }
 })

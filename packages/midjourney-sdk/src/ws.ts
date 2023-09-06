@@ -9,7 +9,7 @@ import {
   MjOriginMessage
 } from './types'
 import { MidjourneyMsgMap } from './msgMap'
-import { v4 as uuid } from 'uuid'
+import { matchRegionNonce } from './utils'
 
 export class MidjourneyWs extends EventEmitter<MjEvents> {
   #ws: WebSocket
@@ -153,7 +153,8 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
   }
 
   handleMessageCreate(type: MjMsgType, message: MjOriginMessage) {
-    const { nonce, id, embeds, custom_id } = message
+    let { nonce, id, embeds, custom_id, content } = message
+    nonce = nonce || matchRegionNonce(content)
     if (nonce) {
       this.msgMap.updateMsgByNonce(id, nonce)
       // if (embeds[0]) {
@@ -166,14 +167,38 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
       //       break
       //   }
       // }
-      if (type === 'INTERACTION_IFRAME_MODAL_CREATE') {
-        this.emitNonce(nonce, type, {
-          iframeUrl: `https://936929561302675456.discordsays.com/inpaint/index.html?instance_id=${
-            this.opts.channel_id
-          }:936929561302675456:${custom_id}&custom_id=${custom_id}&channel_id=${
-            this.opts.channel_id
-          }&guild_id=${this.opts.guild_id}&frame_id=${uuid()}&platform=desktop`
-        })
+      if (type === 'INTERACTION_IFRAME_MODAL_CREATE' && custom_id) {
+        const varyRegionCustomId = custom_id.split('::')[2]
+        // you need to configure the frontend proxy if you in the browser environment, you can see the proxy detail in `packages/playground/vite.config.ts` file.
+        this.opts
+          .fetch(
+            `${this.opts.discordsaysUrl}/inpaint/api/get-image-info/0/0/${varyRegionCustomId}`
+          )
+          .then((res) => res.json())
+          .then((res) =>
+            fetch(
+              `${this.opts.discordsaysUrl}/inpaint${res.image_url?.replace(
+                /^\./,
+                ''
+              )}`
+            )
+              .then((res) => res.blob())
+              .then(
+                (blob) =>
+                  new Promise<FileReader['result']>((resolve, reject) => {
+                    const reader = new FileReader()
+                    reader.onload = (e) => e.target && resolve(e.target.result)
+                    reader.onerror = reject
+                    reader.readAsDataURL(blob)
+                  })
+              )
+              .then((varyRegionImgBase64) =>
+                this.emitNonce(nonce!, type, {
+                  varyRegionCustomId,
+                  varyRegionImgBase64: varyRegionImgBase64 as string
+                })
+              )
+          )
       }
     }
     this.handleMessageUpdate('MESSAGE_CREATE', message)
@@ -236,7 +261,9 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
       this.msgMap.getMsgById(id) ||
       (parentId
         ? this.msgMap.getMsgByparentId(parentId)
-        : this.msgMap.getMsgByContent(content))
+        : this.msgMap.getMsgByContent(content)) ||
+      this.msgMap.getVaryMsgByContent(content)
+    console.log(msg)
     if (!msg?.nonce) return
     let url = attachments.at(0)?.url
     if (url && this.opts.imgBaseUrl) {
