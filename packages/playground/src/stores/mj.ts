@@ -9,9 +9,12 @@ export const useMjStore = defineStore('midjourney', {
   state: () => ({
     ins: null as MidJourney | null,
     user: null as any,
-    mapping: {} as Record<MjMessage['id'], MjMessage>
+    mapping: {} as Record<MjMessage['id'], MjMessage>,
+    iframeUrl: '',
+    openIframe: true
   }),
   getters: {
+    isOpenIframe: ({ iframeUrl }) => !!iframeUrl,
     remix: ({ ins }) => (ins?.opts.remix ? 'yes' : 'no'),
     user: ({ ins }) => ins?.opts.user,
     initialized: ({ ins }) => ins?.opts.initialize === 'initialized'
@@ -35,6 +38,8 @@ export const useMjStore = defineStore('midjourney', {
         delete this.mapping[msg.id]
       } else if (type === 'INTERACTION_IFRAME_MODAL_CREATE') {
         console.log(msg)
+        msg.iframeUrl && (this.iframeUrl = msg.iframeUrl)
+        this.openIframe = true
       } else {
         this.mapping[msg.id] = msg
       }

@@ -52,7 +52,7 @@ export class MidjourneyApi extends MidjourneyCommand {
       )
       return Promise.all([
         this.interactions(payload),
-        this.opts.ws?.waitMessage({ nonce: payload.nonce, cb, prompt: value })
+        this.opts.ws?.waitMessage({ nonce: payload.nonce, cb })
       ]).then(([_, res]) => res)
     })
   }
@@ -101,6 +101,14 @@ export class MidjourneyApi extends MidjourneyCommand {
         parentId: message_id
       })
     ]).then(([_, res]) => res)
+  }
+
+  varyRegion(nonce: string, cb?: MessageCallBack) {
+    console.log(nonce)
+    return this.opts.ws?.waitMessage({
+      nonce,
+      cb
+    })
   }
 
   info(cb?: MessageCallBack) {

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Canvas Masking</title>
+  </head>
+  <body>
+    <canvas id="myCanvas" width="300" height="300"></canvas>
+    <button onclick="finalizeAndConvert()">
+      Finalize and Convert to Base64
+    </button>
+    <textarea id="base64Output" rows="5" cols="50"></textarea>
+
+    <script>
+      let canvas = document.getElementById('myCanvas')
+      let ctx = canvas.getContext('2d')
+
+      let baseImage = new Image()
+      let maskImage = new Image()
+      let isDrawing = false
+      let startX, startY, endX, endY
+      let selectedRegions = []
+      let scaleFactor, scaledWidth, scaledHeight
+
+      baseImage.src = './packages/playground/public/0_0.webp' // Change this to the path of your base image
+      maskImage.src = './packages/playground/public/checkerboard.png' // Change this to the path of your mask image
+
+      baseImage.onload = function () {
+        scaleFactor = Math.min(
+          canvas.width / baseImage.width,
+          canvas.height / baseImage.height
+        )
+        scaledWidth = baseImage.width * scaleFactor
+        scaledHeight = baseImage.height * scaleFactor
+        // Draw the base image with scaling
+        ctx.drawImage(baseImage, 0, 0, scaledWidth, scaledHeight)
+      }
+
+      canvas.addEventListener('mousedown', function (e) {
+        isDrawing = true
+        startX = e.clientX - canvas.offsetLeft
+        startY = e.clientY - canvas.offsetTop
+      })
+
+      canvas.addEventListener('mouseup', function (e) {
+        if (isDrawing) {
+          endX = e.clientX - canvas.offsetLeft
+          endY = e.clientY - canvas.offsetTop
+          console.dir(maskImage)
+          // ctx.drawImage(maskImage, startX, startY, endX - startX, endY - startY)
+          let regionWidth = endX - startX,
+            regionHeight = endY - startY
+          ctx.globalAlpha = 0.5
+          ctx.drawImage(
+            maskImage,
+            startX,
+            startY,
+            regionWidth,
+            regionHeight,
+            startX,
+            startY,
+            regionWidth,
+            regionHeight
+          )
+          ctx.globalAlpha = 1.0
+          selectedRegions.push({ startX, startY, endX, endY })
+        }
+        isDrawing = false
+      })
+
+      canvas.addEventListener('touchstart', function (e) {
+        isDrawing = true
+        startX =
+          (e.touches ? e.touches[0].clientX : e.clientX) - canvas.offsetLeft
+        startY =
+          (e.touches ? e.touches[0].clientY : e.clientY) - canvas.offsetTop
+      })
+
+      canvas.addEventListener('touchend', function (e) {
+        if (isDrawing) {
+          endX =
+            (e.changedTouches ? e.changedTouches[0].clientX : e.clientX) -
+            canvas.offsetLeft
+          endY =
+            (e.changedTouches ? e.changedTouches[0].clientY : e.clientY) -
+            canvas.offsetTop
+          console.dir(maskImage)
+          // ctx.drawImage(maskImage, startX, startY, endX - startX, endY - startY)
+          let regionWidth = endX - startX,
+            regionHeight = endY - startY
+          ctx.globalAlpha = 0.5
+          ctx.drawImage(
+            maskImage,
+            startX,
+            startY,
+            regionWidth,
+            regionHeight,
+            startX,
+            startY,
+            regionWidth,
+            regionHeight
+          )
+          ctx.globalAlpha = 1.0
+          selectedRegions.push({ startX, startY, endX, endY })
+        }
+        isDrawing = false
+      })
+
+      function finalizeAndConvert() {
+        // Reset canvas to black
+        ctx.fillStyle = 'black'
+        ctx.fillRect(0, 0, scaledWidth, scaledHeight)
+
+        // Fill white for selected regions
+        ctx.fillStyle = 'white'
+        for (let region of selectedRegions) {
+          ctx.fillRect(
+            region.startX,
+            region.startY,
+            region.endX - region.startX,
+            region.endY - region.startY
+          )
+        }
+
+        let base64Image = canvas.toDataURL('image/png')
+        document.getElementById('base64Output').value = base64Image
+      }
+    </script>
+  </body>
+</html>
