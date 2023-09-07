@@ -16,7 +16,7 @@ jobs:
         with:
           version: 7.18.2
       - name: Build
-        run: pnpm i && pnpm build:playground
+        run: pnpm i && && pnpm build:sdk && pnpm build:playground
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@releases/v3
         with:
