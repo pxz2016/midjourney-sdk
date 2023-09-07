@@ -78,25 +78,6 @@ export class MidjourneyApi extends MidjourneyCommand {
     })
   }
 
-  // async imagine(value: string, cb?: MessageCallBack) {
-  //   const nonce = nextNonce()
-  //   value = `nonce: ${nonce}, ${value}`
-  //   return this.getCommand('imagine').then((command) => {
-  //     const payload = this.getPayload(
-  //       2,
-  //       Object.assign(command!, {
-  //         options: [{ ...command?.options[0], value }]
-  //       }),
-  //       {},
-  //       nonce
-  //     )
-  //     return Promise.all([
-  //       this.interactions(payload),
-  //       this.opts.ws?.waitMessage({ nonce: payload.nonce, cb })
-  //     ]).then(([_, res]) => res)
-  //   })
-  // }
-
   action(
     message_id: string,
     custom_id: string,

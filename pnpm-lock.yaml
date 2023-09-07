@@ -33,23 +33,19 @@ importers:
   packages/midjourney-sdk:
     specifiers:
       '@types/isomorphic-fetch': ^0.0.36
-      '@types/uuid': ^9.0.3
       chalk: ^5.3.0
       eventemitter3: ^5.0.1
       isomorphic-fetch: ^3.0.0
       isomorphic-ws: ^5.0.0
       snowyflake: ^2.0.0
-      uuid: ^9.0.0
     dependencies:
       chalk: 5.3.0
       eventemitter3: 5.0.1
       isomorphic-fetch: 3.0.0
       isomorphic-ws: 5.0.0
       snowyflake: 2.0.0
-      uuid: 9.0.0
     devDependencies:
       '@types/isomorphic-fetch': 0.0.36
-      '@types/uuid': 9.0.3
 
   packages/playground:
     specifiers:
@@ -760,10 +756,6 @@ packages:
     resolution: {integrity: sha512-l4cmyPEckf8moNYHdJ+4wkHvFxjyW6ulm9l4YGaOxeyBWPhBOT0gvni1InpFPdzx1dKf/2s62qGITwxNWnPQng==}
     dependencies:
       '@types/node': 20.2.4
-    dev: true
-
-  /@types/uuid/9.0.3:
-    resolution: {integrity: sha512-taHQQH/3ZyI3zP8M/puluDEIEvtQHVYcC6y3N8ijFtAd28+Ey/G4sg1u2gB01S8MwybLOKAp9/yCMu/uR5l3Ug==}
     dev: true
 
   /@types/web-bluetooth/0.0.16:
@@ -4038,11 +4030,6 @@ packages:
   /utils-merge/1.0.1:
     resolution: {integrity: sha512-pMZTvIkT1d+TFGvDOqodOclx0QWkkgi6Tdoa8gC8ffGAAqz9pzPTZWAybbsHHoED/ztMtkv/VoYTYyShUn81hA==}
     engines: {node: '>= 0.4.0'}
-    dev: false
-
-  /uuid/9.0.0:
-    resolution: {integrity: sha512-MXcSTerfPa4uqyzStbRoTgt5XIe3x5+42+q1sDuy3R5MDk66URdLMOZe5aPX/SQd+kuYAh0FdP/pO28IkQyTeg==}
-    hasBin: true
     dev: false
 
   /validate-npm-package-license/3.0.4:

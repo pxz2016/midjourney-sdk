@@ -7,7 +7,7 @@
     "dev": "run-p dev:sdk dev:playground",
     "dev:sdk": "node scripts/dev",
     "dev:playground": "pnpm -F playground dev",
-    "build": "pnpm -F midjourney-sdk build",
+    "build:sdk": "pnpm -F midjourney-sdk build",
     "build:playground": "pnpm -F playground build",
     "format": "prettier --check --write .",
     "proxy": "pnpm -F proxy start"

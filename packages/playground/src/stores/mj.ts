@@ -34,12 +34,12 @@ export const useMjStore = defineStore('midjourney', {
     },
     handleMsg(type: MjMsgType, msg: MjMessage) {
       console.log(
-        `消息类型: ${type}, 事件ID: ${msg.nonce}, 消息ID: ${msg.id}, 父级ID: ${msg.parentId}, 进度: ${msg.progress}`
+        `消息类型: ${type}, 事件ID: ${msg.nonce}, 消息ID: ${msg.id}, 父级ID: ${msg.parentId}, 原始ID: ${msg.originId}, 进度: ${msg.progress}`
       )
       if (type === 'MESSAGE_DELETE') {
         delete this.mapping[msg.id]
       } else if (type === 'INTERACTION_IFRAME_MODAL_CREATE') {
-        console.log(msg)
+        // console.log(msg)
         msg.varyRegionImgBase64 &&
           (this.varyRegionInfo.varyRegionImgBase64 = msg.varyRegionImgBase64)
         msg.varyRegionCustomId &&

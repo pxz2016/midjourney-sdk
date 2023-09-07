@@ -153,24 +153,32 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
   }
 
   handleMessageCreate(type: MjMsgType, message: MjOriginMessage) {
-    let { nonce, id, embeds, custom_id, content } = message
+    let {
+      nonce,
+      id,
+      embeds,
+      custom_id,
+      content,
+      components,
+      attachments = []
+    } = message
     nonce = nonce || matchRegionNonce(content)
-    if (nonce) {
+    if (nonce && !attachments.length) {
       this.msgMap.updateMsgByNonce(id, nonce)
-      // if (embeds[0]) {
-      //   const { color } = embeds[0]
-      //   switch (color) {
-      //     case 16711680:
-      //       this.emitEmbed(id, 'MESSAGE_CREATE', embeds[0])
-      //       break
-      //     default:
-      //       break
-      //   }
-      // }
+      if (embeds[0]) {
+        const { color } = embeds[0]
+        switch (color) {
+          case 16711680:
+            this.emitEmbed(id, 'MESSAGE_CREATE', embeds[0])
+            break
+          default:
+            break
+        }
+      }
       if (type === 'INTERACTION_IFRAME_MODAL_CREATE' && custom_id) {
         const varyRegionCustomId = custom_id.split('::')[2]
         // you need to configure the frontend proxy if you in the browser environment, you can see the proxy detail in `packages/playground/vite.config.ts` file.
-        this.opts
+        return this.opts
           .fetch(
             `${this.opts.discordsaysUrl}/inpaint/api/get-image-info/0/0/${varyRegionCustomId}`
           )
@@ -213,29 +221,29 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
       embeds,
       id
     } = message
-    // if (!nonce) {
-    //   const { name } = interaction
-    //   const msg = this.msgMap.getMsgById(id)
-    //   if (msg && msg.nonce) {
-    //     switch (name) {
-    //       case 'settings':
-    //         this.emitNonce(msg.nonce, type, {
-    //           id,
-    //           components,
-    //           progress: 100
-    //         })
-    //         return
-    //       case 'info':
-    //         embeds.at(0) &&
-    //           this.emitNonce(msg.nonce, type, {
-    //             id,
-    //             embed: embeds[0],
-    //             progress: 100
-    //           })
-    //         return
-    //     }
-    //   }
-    // }
+    if (!nonce) {
+      const { name } = interaction
+      const msg = this.msgMap.getMsgById(id)
+      if (msg && msg.nonce) {
+        switch (name) {
+          case 'settings':
+            this.emitNonce(msg.nonce, type, {
+              id,
+              components,
+              progress: 100
+            })
+            return
+          case 'info':
+            embeds.at(0) &&
+              this.emitNonce(msg.nonce, type, {
+                id,
+                embed: embeds[0],
+                progress: 100
+              })
+            return
+        }
+      }
+    }
     if (content) {
       this.processingImage(type, message)
     }
@@ -261,9 +269,8 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
       this.msgMap.getMsgById(id) ||
       (parentId
         ? this.msgMap.getMsgByparentId(parentId)
-        : this.msgMap.getMsgByContent(content)) ||
-      this.msgMap.getVaryMsgByContent(content)
-    console.log(msg)
+        : this.msgMap.getMsgByContent(content))
+    // console.log(msg)
     if (!msg?.nonce) return
     let url = attachments.at(0)?.url
     if (url && this.opts.imgBaseUrl) {

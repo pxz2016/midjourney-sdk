@@ -10,7 +10,12 @@
   "keywords": [
     "midjourney",
     "midjourney-api",
-    "midjourney-sdk"
+    "midjourney-sdk",
+    "custom-zoom",
+    "vary-region",
+    "zoom-out",
+    "vary-strong",
+    "vary-subtle"
   ],
   "author": "LaiBaoYuan",
   "license": "MIT",
@@ -24,7 +29,7 @@
   },
   "scripts": {
     "dev": "pnpm -F playground dev",
-    "build": "tsc --noEmit && rollup --config rollup.config.ts --configPlugin esbuild",
+    "build": "rollup --config rollup.config.ts --configPlugin esbuild",
     "format": "prettier --check --write ."
   },
   "dependencies": {
@@ -32,14 +37,12 @@
     "eventemitter3": "^5.0.1",
     "isomorphic-fetch": "^3.0.0",
     "isomorphic-ws": "^5.0.0",
-    "snowyflake": "^2.0.0",
-    "uuid": "^9.0.0"
+    "snowyflake": "^2.0.0"
   },
   "files": [
     "dist"
   ],
   "devDependencies": {
-    "@types/isomorphic-fetch": "^0.0.36",
-    "@types/uuid": "^9.0.3"
+    "@types/isomorphic-fetch": "^0.0.36"
   }
 }

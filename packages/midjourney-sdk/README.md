@@ -2,8 +2,6 @@
 
 MidJourney in Discord API for Node.js.
 
-## It's useful for you, please give me open source power、support and star✨ this repo.
-
 ## Demo
 
 [Live demo](laibaoyuan.github.io/midjourney-sdk)
@@ -40,14 +38,6 @@ const ins = new MidJourney({
     'msgId',
     'customId',
     'msgFlags',
-    ({ url, progress }) => {
-      console(url, progress)
-    }
-  )
-  const msg3 = await ins.api.varyRegion(
-    'customId',
-    'prompt',
-    'mask',
     ({ url, progress }) => {
       console(url, progress)
     }

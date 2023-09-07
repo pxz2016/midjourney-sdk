@@ -11,7 +11,11 @@ export class MidJourney {
       throw new Error('`token`、`channel_id` and `guild_id` are required')
     }
     this.opts = Object.assign(defaultOpts, opts, {
-      initialize: 'not_initialized'
+      initialize: 'not_initialized',
+      discordsaysUrl:
+        typeof document === 'undefined'
+          ? 'https://936929561302675456.discordsays.com'
+          : ''
     }) as MidJourneyFullOptions
     if (!this.opts.apiBaseUrl) throw new Error("apiBaseUrl can't be empty")
     if (!this.opts.wsBaseUrl) throw new Error("wsBaseUrl can't be empty")
