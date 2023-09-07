@@ -5,11 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "run-p dev:sdk dev:playground",
-    "test": "tsc --noEmit && rollup --config rollup.config.ts --configPlugin esbuild",
     "build": "run-s build:sdk build:playground",
     "dev:sdk": "node scripts/dev",
     "dev:playground": "pnpm -F playground dev",
-    "build:sdk": "pnpm -F midjourney-sdk build",
+    "build:sdk": "tsc --noEmit && rollup --config rollup.config.ts --configPlugin esbuild",
     "build:playground": "pnpm -F playground build",
     "format": "prettier --check --write .",
     "proxy": "pnpm -F proxy start"
