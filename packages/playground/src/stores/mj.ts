@@ -16,9 +16,6 @@ export const useMjStore = defineStore('midjourney', {
     },
     openIframe: false
   }),
-  getters: {
-    initialize: ({ ins }) => ins?.initialize
-  },
   actions: {
     async init(opts: MidJourneyOptions) {
       let ins = new MidJourney(opts)

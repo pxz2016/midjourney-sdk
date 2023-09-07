@@ -3,7 +3,7 @@
     class="pb-[10vh] pt-5 bg-gray-950/80 text-white h-full w-full relative overflow-auto"
   >
     <Welcome />
-    <MjForm v-if="!mj.initialize" />
+    <MjForm v-if="!mj.ins?.initialize" />
     <template v-else>
       <div class="flex flex-col gap-4">
         <MsgItem v-for="(v, k) in mj.mapping" :key="k" :item="v"></MsgItem>
