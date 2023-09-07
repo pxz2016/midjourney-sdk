@@ -277,14 +277,18 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
       (parentId
         ? this.msgMap.getMsgByparentId(parentId)
         : this.msgMap.getMsgByContent(content))
-    // console.log(msg)
+    console.log(msg, 'processingImage')
     if (!msg?.nonce) return
     let url = attachments.at(0)?.url
     if (url && this.opts.imgBaseUrl) {
       url = url.replace('https://cdn.discordapp.com', this.opts.imgBaseUrl)
     }
     const progressMatch = content.match(/\((\d+?)%\)\s\(\w+?\)/)?.[1]
-    const isNewCreateMsg = !nonce && attachments.length && components.length
+    const isNewCreateMsg =
+      !nonce &&
+      attachments.length &&
+      components.length &&
+      type === 'MESSAGE_CREATE'
     const progress = isNewCreateMsg
       ? 100
       : progressMatch
