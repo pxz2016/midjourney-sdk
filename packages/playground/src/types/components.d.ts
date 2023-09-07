@@ -7,12 +7,18 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
+    Dialog: typeof import('@headlessui/vue')['Dialog']
+    DialogPanel: typeof import('@headlessui/vue')['DialogPanel']
+    DialogTitle: typeof import('@headlessui/vue')['DialogTitle']
     Footer: typeof import('./../components/Footer/index.vue')['default']
     InpaintingEditor: typeof import('./../components/InpaintingEditor/index.vue')['default']
     MjForm: typeof import('./../components/MjForm/index.vue')['default']
     MjModal: typeof import('./../components/MjModal/index.vue')['default']
+    MjToast: typeof import('./../components/MjToast/index.vue')['default']
     MsgItem: typeof import('./../components/MsgItem/index.vue')['default']
     SvgIcon: typeof import('./../components/SvgIcon/index.vue')['default']
+    TransitionChild: typeof import('@headlessui/vue')['TransitionChild']
+    TransitionRoot: typeof import('@headlessui/vue')['TransitionRoot']
     Welcome: typeof import('./../components/Welcome/index.vue')['default']
   }
 }
