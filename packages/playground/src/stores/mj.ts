@@ -25,10 +25,10 @@ export const useMjStore = defineStore('midjourney', {
     init(opts: MidJourneyOptions) {
       this.ins = new MidJourney({
         ...opts,
-        apiBaseUrl: import.meta.env.VITE_API_BASE_URL,
-        imgBaseUrl: import.meta.env.VITE_IMG_BASE_URL,
-        wsBaseUrl: import.meta.env.VITE_WS_BASE_URL,
-        skipHeartbeat: true
+        // apiBaseUrl: import.meta.env.VITE_API_BASE_URL,
+        // imgBaseUrl: import.meta.env.VITE_IMG_BASE_URL,
+        // wsBaseUrl: import.meta.env.VITE_WS_BASE_URL,
+        // skipHeartbeat: true
       })
       return this.ins.init()
     },
