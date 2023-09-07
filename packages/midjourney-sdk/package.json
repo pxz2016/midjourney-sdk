@@ -29,7 +29,7 @@
   },
   "scripts": {
     "dev": "pnpm -F playground dev",
-    "build": "rollup --config rollup.config.ts --configPlugin esbuild",
+    "build": "tsc --noEmit && rollup --config rollup.config.ts --configPlugin esbuild",
     "format": "prettier --check --write ."
   },
   "dependencies": {

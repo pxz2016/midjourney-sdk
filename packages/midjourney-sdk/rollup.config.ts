@@ -53,7 +53,7 @@ export default defineConfig([
       format: 'esm',
       file: 'dist/index.d.ts'
     },
-    plugins: [dts({ respectExternal: true })],
+    plugins: [dts({ compilerOptions: { baseUrl: '.' } })],
     external
   }
 ])
