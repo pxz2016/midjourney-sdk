@@ -1,5 +1,5 @@
 import { defineConfig } from 'rollup'
-import { resolve } from 'path'
+import path from 'path'
 import { fileURLToPath } from 'url'
 import dts from 'rollup-plugin-dts'
 import { nodeResolve } from '@rollup/plugin-node-resolve'
@@ -9,10 +9,13 @@ import json from '@rollup/plugin-json'
 import { builtinModules, createRequire } from 'module'
 
 const require = createRequire(import.meta.url)
-const pkg = require('./package.json')
+const __dirname = fileURLToPath(new URL('.', import.meta.url))
 
-const ROOT = fileURLToPath(import.meta.url)
-const r = (p: string) => resolve(ROOT, '..', p)
+const packagesDir = path.resolve(__dirname, 'packages')
+const packageDir = path.resolve(packagesDir, 'midjourney-sdk')
+
+const resolve = (p) => path.resolve(packageDir, p)
+const pkg = require(resolve(`package.json`))
 
 const plugins = [
   commonjs(),
@@ -30,15 +33,15 @@ const external = [
 
 export default defineConfig([
   {
-    input: r('src/index.ts'),
+    input: resolve('src/index.ts'),
     output: [
       {
         format: 'esm',
-        file: 'dist/index.js'
+        file: resolve('dist/index.js')
       },
       {
         format: 'cjs',
-        file: 'dist/index.cjs'
+        file: resolve('dist/index.cjs')
       }
     ],
     plugins,
@@ -48,12 +51,12 @@ export default defineConfig([
     }
   },
   {
-    input: r('src/index.ts'),
+    input: resolve('src/index.ts'),
     output: {
       format: 'esm',
-      file: 'dist/index.d.ts'
+      file: resolve('dist/index.d.ts')
     },
-    plugins: [dts({ compilerOptions: { baseUrl: '.' } })],
+    plugins: [dts({ respectExternal: true })],
     external
   }
 ])

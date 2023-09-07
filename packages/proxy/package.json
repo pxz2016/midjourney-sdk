@@ -1,5 +1,6 @@
 {
   "name": "@midjourney-sdk/proxy",
+  "description": "discord proxy",
   "scripts": {
     "start": "node index"
   },

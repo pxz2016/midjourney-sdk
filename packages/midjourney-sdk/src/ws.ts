@@ -12,57 +12,62 @@ import { MidjourneyMsgMap } from './msgMap'
 import { matchRegionNonce } from './utils'
 
 export class MidjourneyWs extends EventEmitter<MjEvents> {
-  #ws: WebSocket
-  #lastSequence: number | null = null
-  #heartbeatTask: NodeJS.Timer | null = null
-  #reconnectionTask: NodeJS.Timeout | null = null
+  wsClient: WebSocket
+  private lastSequence: number | null = null
+  private heartbeatTask: NodeJS.Timer | null = null
+  private reconnectionTask: NodeJS.Timeout | null = null
+  private msgMap = new MidjourneyMsgMap()
 
-  msgMap = new MidjourneyMsgMap()
   constructor(public opts: MidJourneyFullOptions) {
     super()
-    this.#ws = this.#connect()
+    this.wsClient = this.connect()
   }
 
-  #connect() {
+  private connect() {
     if (!this.opts.wsBaseUrl) throw new Error("wsBaseUrl can't be empty")
-    const ws = new WebSocket(this.opts.wsBaseUrl)
-    ws.addEventListener('open', () => {
+    const wsClient = new WebSocket(this.opts.wsBaseUrl)
+    wsClient.addEventListener('open', () => {
       this.emit('WS_OPEN')
-      this.opts.debug?.('MidjourneyWs', '#connect')('ws is open!')
-      if (this.#reconnectionTask) {
-        clearTimeout(this.#reconnectionTask)
-        this.#reconnectionTask = null
+      this.opts.debug?.('MidjourneyWs', 'connect')('wsClient is open!')
+      if (this.reconnectionTask) {
+        clearTimeout(this.reconnectionTask)
+        this.reconnectionTask = null
       }
     })
-    ws.addEventListener('message', this.#message.bind(this))
-    ws.addEventListener('error', (err) => {
+    wsClient.addEventListener('message', this.message.bind(this))
+    wsClient.addEventListener('error', (err) => {
       this.emit('WS_ERROR', err.message)
       this.opts.debug?.(
         'MidjourneyWs',
-        '#connect'
-      )(`discord ws occurred an error: ${err.message}`)
-      this.#ws.close()
+        'connect'
+      )(`discord wsClient occurred an error: ${err.message}`)
+      this.wsClient.close()
     })
-    ws.addEventListener('close', ({ code, reason }) => {
+    wsClient.addEventListener('close', ({ code, reason }) => {
       this.emit('WS_CLOSE')
       this.opts.debug?.(
         'MidjourneyWs',
-        '#connect'
-      )(`discord ws was close, error code: ${code}, error reason: ${reason}`)
-      this.#reconnectionTask = setTimeout(() => {
-        this.opts.debug?.('MidjourneyWs', '#connect')('discord ws reconnect...')
-        if (this.#heartbeatTask) {
-          clearInterval(this.#heartbeatTask)
-          this.#heartbeatTask = null
+        'connect'
+      )(
+        `discord wsClient was close, error code: ${code}, error reason: ${reason}`
+      )
+      this.reconnectionTask = setTimeout(() => {
+        this.opts.debug?.(
+          'MidjourneyWs',
+          'connect'
+        )('discord wsClient reconnect...')
+        if (this.heartbeatTask) {
+          clearInterval(this.heartbeatTask)
+          this.heartbeatTask = null
         }
-        this.#ws = this.#connect.call(this)
+        this.wsClient = this.connect.call(this)
       }, 4000)
     })
-    return ws
+    return wsClient
   }
 
-  #auth() {
-    this.#ws.send(
+  private auth() {
+    this.wsClient.send(
       JSON.stringify({
         op: 2,
         d: {
@@ -79,36 +84,36 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
     )
   }
 
-  #heartbeat(interval: number) {
+  private heartbeat(interval: number) {
     const nextInterval = interval * Math.random()
     !this.opts.skipHeartbeat &&
       this.opts.debug?.(
         'MidjourneyWs',
-        '#heartbeat'
+        'heartbeat'
       )(`send discord heartbeat after ${Math.round(nextInterval / 1000)}s`)
-    this.#heartbeatTask = setTimeout(() => {
-      if (this.#ws.readyState === WebSocket.OPEN) {
-        this.#ws.send(
+    this.heartbeatTask = setTimeout(() => {
+      if (this.wsClient.readyState === WebSocket.OPEN) {
+        this.wsClient.send(
           JSON.stringify({
             op: 1,
-            d: this.#lastSequence
+            d: this.lastSequence
           })
         )
-        this.#heartbeat(interval)
+        this.heartbeat(interval)
       }
     }, nextInterval)
   }
 
-  #message(e: WebSocket.MessageEvent) {
+  private message(e: WebSocket.MessageEvent) {
     const payload = JSON.parse(e.data as string)
     const data = payload.d as MjOriginMessage
     const type = payload.t as MjMsgType
     const seq = payload.s as number
     const operate = payload.op as number
-    seq && (this.#lastSequence = seq)
+    seq && (this.lastSequence = seq)
     this.opts.debug?.(
       'MidjourneyWs',
-      '#message'
+      'message'
     )(
       [
         { label: 'MessageType', value: type },
@@ -119,13 +124,16 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
         .join(', ')
     )
     if (operate === 10) {
-      this.#heartbeat(data.heartbeat_interval!)
-      this.#auth()
+      this.heartbeat(data.heartbeat_interval!)
+      this.auth()
     }
     if (type === 'READY') {
       this.opts.session_id = data.session_id
       this.opts.user = data.user
-      this.opts.debug?.('MidjourneyWs', '#message')('ws connect successfully!')
+      this.opts.debug?.(
+        'MidjourneyWs',
+        'message'
+      )('wsClient connect successfully!')
       this.emit('READY', data.user)
     }
     if (
@@ -139,11 +147,11 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
     }
     if (operate === 11) {
       !this.opts.skipHeartbeat &&
-        this.opts.debug?.('MidjourneyWs', '#message')('discord heartbeat ack!')
+        this.opts.debug?.('MidjourneyWs', 'message')('discord heartbeat ack!')
     }
   }
 
-  handleMessage(type: MjMsgType, message: MjOriginMessage) {
+  private handleMessage(type: MjMsgType, message: MjOriginMessage) {
     if (message.channel_id !== this.opts.channel_id) return
     if (type === 'MESSAGE_CREATE' || type === 'INTERACTION_IFRAME_MODAL_CREATE')
       this.handleMessageCreate(type, message)
@@ -152,14 +160,13 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
     else this.handleMessageDelete(message)
   }
 
-  handleMessageCreate(type: MjMsgType, message: MjOriginMessage) {
+  private handleMessageCreate(type: MjMsgType, message: MjOriginMessage) {
     let {
       nonce,
       id,
-      embeds,
+      embeds = [],
       custom_id,
       content,
-      components,
       attachments = []
     } = message
     nonce = nonce || matchRegionNonce(content)
@@ -212,13 +219,13 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
     this.handleMessageUpdate('MESSAGE_CREATE', message)
   }
 
-  handleMessageUpdate(type: MjMsgType, message: MjOriginMessage) {
+  private handleMessageUpdate(type: MjMsgType, message: MjOriginMessage) {
     const {
       content,
       interaction = {} as MjOriginMessage['interaction'],
       nonce,
-      components,
-      embeds,
+      components = [],
+      embeds = [],
       id
     } = message
     if (!nonce) {
@@ -249,17 +256,17 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
     }
   }
 
-  handleMessageDelete({ id }: MjOriginMessage) {
+  private handleMessageDelete({ id }: MjOriginMessage) {
     this.emitNonce(id, 'MESSAGE_DELETE', { id }, true)
   }
 
-  processingImage(type: MjMsgType, message: MjOriginMessage) {
+  private processingImage(type: MjMsgType, message: MjOriginMessage) {
     const {
       content,
       id,
-      attachments,
+      attachments = [],
       flags,
-      components,
+      components = [],
       nonce,
       timestamp,
       message_reference = {} as MjOriginMessage['message_reference']
@@ -300,7 +307,7 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
     this.emitNonce(msg.nonce, type, mjMsg)
   }
 
-  emitNonce(
+  private emitNonce(
     idOrNonce: string,
     type: MjMsgType,
     msg: Partial<MjMessage>,
@@ -319,7 +326,7 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
       )
   }
 
-  emitEmbed(id: string, type: MjMsgType, embed: MjMessage['embed']) {
+  private emitEmbed(id: string, type: MjMsgType, embed: MjMessage['embed']) {
     const msg = this.msgMap.getMsgById(id)
     if (!msg || !msg.nonce) return
     msg.embed = embed

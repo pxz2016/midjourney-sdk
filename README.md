@@ -2,7 +2,7 @@
 
 MidJourney in Discord API for Node.js.
 
-## It's useful for you, please give me open source power、support and star✨ this repo.
+_It's useful for you, please give me open source power、support and star✨ this repo._
 
 ## Demo
 
@@ -10,11 +10,18 @@ MidJourney in Discord API for Node.js.
 
 ## Support
 
-- [x] `/imagine`、`variation`、`upscale`、`reroll`、`zoomout`
-- [x] `/info`
-- [x] `/fast ` and `/relax `
-- [x] `/vary(Region)`
-- [x] [proxy](https://github.com/LaiBaoYuan/midjourney-sdk/tree/master/packages/proxy)
+- Command
+  - [x] `/imagine`
+  - [x] `/info`
+  - [x] `/settings`
+  - [x] `/fast`
+  - [x] `/relax`
+- Button Action
+  - [x] `upscale`
+  - [x] `variation`
+  - [x] `reroll`
+  - [x] `zoomout`
+  - [x] `vary(Region)`
 
 ## Install
 
@@ -31,7 +38,8 @@ const ins = new MidJourney({
   guild_id: import.meta.env.VITE_GUILD_ID,
   channel_id: import.meta.env.VITE_CHANNEL_ID,
   skipHeartbeat: true
-})(async () => {
+})
+;(async () => {
   await ins.init()
   const msg1 = await ins.api.imagine('apple --q 5', ({ url, progress }) => {
     console(url, progress)
@@ -64,8 +72,11 @@ const ins = new MidJourney({
 VITE_TOKEN=
 VITE_GUILD_ID=
 VITE_CHANNEL_ID=
+# discord api proxy url
 VITE_API_BASE_URL=
+# discord image proxy url
 VITE_IMG_BASE_URL=
+# discord websocket proxy url
 VITE_WS_BASE_URL=
 ```
 
@@ -74,6 +85,8 @@ VITE_WS_BASE_URL=
 ```bash
 pnpm dev
 ```
+
+- open `http://localhost:5173/midjourney-sdk`
 
 # Proxy
 

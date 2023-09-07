@@ -20,9 +20,6 @@ const createProxy = (path, target, options = {}) => [
 router.use(...createProxy('/discordapp', 'https://cdn.discordapp.com'))
 // proxy discord api
 router.use(...createProxy('/discord', 'https://discord.com'))
-router.use(
-  ...createProxy('/discordsays', 'https://936929561302675456.discordsays.com')
-)
 // proxy disocrd websokcet
 router.use(
   '/discordWs',

@@ -4,31 +4,30 @@ import { MidJourneyFullOptions, MidJourneyOptions } from './types'
 import { MidjourneyWs } from './ws'
 
 export class MidJourney {
-  public api: MidjourneyApi
-  opts: MidJourneyFullOptions
+  api: MidjourneyApi
+  private opts: MidJourneyFullOptions
   constructor(opts: MidJourneyOptions) {
     if (!opts.token || !opts.channel_id || !opts.guild_id) {
       throw new Error('`token`、`channel_id` and `guild_id` are required')
     }
-    this.opts = Object.assign(defaultOpts, opts, {
-      initialize: 'not_initialized',
-      discordsaysUrl:
-        typeof document === 'undefined'
-          ? 'https://936929561302675456.discordsays.com'
-          : ''
-    }) as MidJourneyFullOptions
-    if (!this.opts.apiBaseUrl) throw new Error("apiBaseUrl can't be empty")
-    if (!this.opts.wsBaseUrl) throw new Error("wsBaseUrl can't be empty")
+    this.opts = Object.assign({}, defaultOpts, opts) as MidJourneyFullOptions
+    if (!this.opts.apiBaseUrl) this.opts.apiBaseUrl = defaultOpts.apiBaseUrl
+    if (!this.opts.wsBaseUrl) this.opts.wsBaseUrl = defaultOpts.wsBaseUrl
+    if (!this.opts.imgBaseUrl) this.opts.imgBaseUrl = defaultOpts.imgBaseUrl
     this.api = new MidjourneyApi(this.opts)
   }
 
-  init() {
-    return new Promise<MidJourney>(async (s) => {
-      this.opts.initialize = 'initializing'
-      this.opts.ws = new MidjourneyWs(this.opts)
-      await this.opts.ws.waitReady()
-      this.opts.initialize = 'initialized'
-      s(this)
-    })
+  async init() {
+    this.opts.ws = new MidjourneyWs(this.opts)
+    await this.opts.ws.waitReady()
+    return this
+  }
+
+  get initialize() {
+    return this.opts.ws?.wsClient.readyState === 1
+  }
+
+  get user() {
+    return this.opts.user
   }
 }

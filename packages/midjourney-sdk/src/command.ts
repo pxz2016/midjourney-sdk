@@ -23,7 +23,7 @@ export type CommandName = (typeof Commands)[number]
 
 export class MidjourneyCommand {
   constructor(public opts: MidJourneyFullOptions) {}
-  commandCaches: Partial<Record<CommandName, ApplicationCommond>> = {}
+  private commandCaches: Partial<Record<CommandName, ApplicationCommond>> = {}
 
   getCommand(query: CommandName) {
     if (!this.commandCaches[query]) {

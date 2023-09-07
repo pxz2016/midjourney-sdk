@@ -27,11 +27,6 @@
     "type": "git",
     "url": "git+https://github.com/LaiBaoYuan/midjourney-sdk.git"
   },
-  "scripts": {
-    "dev": "pnpm -F playground dev",
-    "build": "tsc --noEmit && rollup --config rollup.config.ts --configPlugin esbuild",
-    "format": "prettier --check --write ."
-  },
   "dependencies": {
     "chalk": "^5.3.0",
     "eventemitter3": "^5.0.1",

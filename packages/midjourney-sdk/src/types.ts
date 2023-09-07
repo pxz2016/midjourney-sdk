@@ -1,24 +1,20 @@
 import { debug } from './utils'
 import { MidjourneyWs } from './ws'
 
-export type InitStatus = 'not_initialized' | 'initializing' | 'initialized'
-
 export interface MidJourneyFullOptions {
   token: string
   guild_id: string
   channel_id: string
-  session_id?: string
-  debug?: typeof debug
   skipHeartbeat: boolean
-  remix: boolean
   apiBaseUrl: string
   wsBaseUrl: string
   imgBaseUrl: string
   fetch: typeof fetch
+  discordsaysUrl: string
+  session_id?: string
   ws?: MidjourneyWs
   user?: MjOriginMessage['user']
-  initialize: InitStatus
-  discordsaysUrl: string
+  debug?: typeof debug
 }
 
 export type MidJourneyOptions = Pick<
@@ -31,11 +27,10 @@ export type MidJourneyOptions = Pick<
       | 'token'
       | 'channel_id'
       | 'guild_id'
-      | 'remix'
       | 'ws'
       | 'user'
-      | 'initialize'
       | 'discordsaysUrl'
+      | 'session_id'
     >
   >
 
@@ -90,10 +85,11 @@ export interface MjMessage {
   components?: MjOriginMessage['components']
   originId?: string
   parentId?: string
-  deleted?: boolean
   timestamp?: string
+  // Vary (Region)
   varyRegionCustomId?: string
   varyRegionImgBase64?: string
+  // other...
   [key: string]: any
 }
 

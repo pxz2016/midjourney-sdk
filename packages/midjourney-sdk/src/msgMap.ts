@@ -37,12 +37,4 @@ export class MidjourneyMsgMap extends Map<MjMessage['nonce'], MjMessage> {
     const regionNonce = content?.match(RE)?.[1]
     return this.get(regionNonce)
   }
-
-  delMsgById(id: string) {
-    let msg = this.getMsgById(id)
-    if (msg) {
-      msg.deleted = true
-      return msg
-    }
-  }
 }

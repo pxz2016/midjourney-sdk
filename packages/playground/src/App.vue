@@ -3,82 +3,27 @@
     class="pb-[10vh] pt-5 bg-gray-950/80 text-white h-full w-full relative overflow-auto"
   >
     <Welcome />
-    <el-form
-      ref="formRef"
-      v-if="!mj.initialized"
-      label-position="top"
-      class="flex flex-col p-5 gap-2"
-      :model="form"
-      :rules="rules"
-    >
-      <el-form-item label="Guild's id" prop="guild_id">
-        <el-input placeholder="guild_id" v-model="form.guild_id" />
-      </el-form-item>
-      <el-form-item label="Channel's id" prop="channel_id">
-        <el-input placeholder="channel_id" v-model="form.channel_id" />
-      </el-form-item>
-      <el-form-item label="User Token" prop="token">
-        <el-input placeholder="token" v-model="form.token" />
-      </el-form-item>
-      <el-form-item>
-        <el-button class="w-full" @click="handleLogin">Login</el-button>
-      </el-form-item>
-    </el-form>
+    <MjForm v-if="!mj.initialize" />
     <template v-else>
       <div class="flex flex-col gap-4">
         <MsgItem v-for="(v, k) in mj.mapping" :key="k" :item="v"></MsgItem>
       </div>
       <Footer />
     </template>
-    <el-dialog
-      v-if="mj.openIframe"
-      v-model="mj.openIframe"
-      fullscreen
-      title="Tips"
-      width="50%"
+    <!-- <button
+      type="button"
+      @click="isOpen = true"
+      class="rounded-md bg-black bg-opacity-20 px-4 py-2 text-sm font-medium text-white hover:bg-opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75"
     >
-      <div class="flex items-center justify-center">
-        <InpaintingEditor />
-      </div>
-      <!-- <div>{{ mj.iframeUrl }}</div>
-      <iframe class="w-full h-[50vh]" :src="mj.iframeUrl"></iframe> -->
-    </el-dialog>
+      Open dialog
+    </button> -->
+    <!-- <MjModal v-model:show="isOpen" title="11" panel-class="!w-full md:!w-1/2">
+      111
+    </MjModal> -->
   </div>
 </template>
 
 <script setup lang="ts">
-import { FormRules, FormInstance } from 'element-plus'
-import { MidJourneyOptions } from 'midjourney-sdk'
-
 const mj = useMjStore()
-const formRef = ref<FormInstance>()
-const rules = reactive<FormRules>({
-  token: [
-    { required: true, message: 'please input your token', trigger: 'blur' }
-  ],
-  guild_id: [
-    {
-      required: true,
-      message: "please input the discord's guild_id",
-      trigger: 'blur'
-    }
-  ],
-  channel_id: [
-    { required: true, message: 'please input your token', trigger: 'blur' }
-  ]
-})
-
-const form = reactive<MidJourneyOptions>({
-  token: import.meta.env.VITE_TOKEN,
-  guild_id: import.meta.env.VITE_GUILD_ID,
-  channel_id: import.meta.env.VITE_CHANNEL_ID
-})
-
-const handleLogin = () => {
-  formRef.value?.validate((res) => {
-    if (res) {
-      mj.init(form)
-    }
-  })
-}
+const isOpen = ref(false)
 </script>

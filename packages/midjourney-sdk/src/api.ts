@@ -7,7 +7,7 @@ export class MidjourneyApi extends MidjourneyCommand {
     super(opts)
   }
 
-  private async interactions(payload: any) {
+  private interactions(payload: any) {
     const headers = {
       'Content-Type': 'application/json',
       Authorization: this.opts.token
@@ -25,7 +25,7 @@ export class MidjourneyApi extends MidjourneyCommand {
     others: any = {},
     nonce = nextNonce()
   ) {
-    if (!this.opts.session_id && this.opts.initialize !== 'initialized') {
+    if (!this.opts.session_id) {
       throw new Error('please invoke `init` method before every operate')
     }
     return Object.assign(
