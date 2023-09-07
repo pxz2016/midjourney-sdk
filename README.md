@@ -6,7 +6,7 @@ MidJourney in Discord API for Node.js.
 
 ## Demo
 
-[Live demo](laibaoyuan.github.io/midjourney-sdk)
+[Live demo](https://laibaoyuan.github.io/midjourney-sdk)
 
 ## Support
 
