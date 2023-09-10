@@ -56,7 +56,7 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
           'MidjourneyWs',
           'connect'
         )('discord wsClient reconnect...')
-        if (this.heartbeatTask) {
+        if (this.heartbeatTask && typeof this.heartbeatTask === 'number') {
           clearInterval(this.heartbeatTask)
           this.heartbeatTask = null
         }

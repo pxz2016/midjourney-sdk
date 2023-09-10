@@ -1,25 +1,24 @@
 {
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
     "target": "ES2020",
     "useDefineForClassFields": true,
     "module": "ESNext",
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "skipLibCheck": true,
-    "allowJs": true,
     "baseUrl": ".",
-    "rootDir": ".",
     "paths": {
-      "midjourney-sdk": ["packages/midjourney-sdk/src"]
+      "@/*": ["src/*"]
     },
+
     "moduleResolution": "Node",
     "strict": true,
     "resolveJsonModule": true,
-    "isolatedModules": false,
+    "isolatedModules": true,
     "esModuleInterop": true,
     "types": ["node"],
-    "jsx": "preserve",
     "noEmit": true
   },
-  "include": ["packages/*/src", "packages/global.d.ts"],
-  "exclude": ["packages/playground-next", "packages/playground-vue"]
+  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue"],
+  "references": [{ "path": "./tsconfig.node.json" }]
 }

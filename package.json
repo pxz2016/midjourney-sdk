@@ -7,9 +7,9 @@
     "dev": "run-p dev:sdk dev:playground",
     "build": "run-s build:sdk build:playground",
     "dev:sdk": "node scripts/dev",
-    "dev:playground": "pnpm -F playground dev",
+    "dev:playground": "pnpm -F playground-next dev",
     "build:sdk": "tsc --noEmit && rollup --config rollup.config.ts --configPlugin esbuild",
-    "build:playground": "pnpm -F playground build",
+    "build:playground": "pnpm -F playground2 build",
     "format": "prettier --check --write .",
     "proxy": "pnpm -F proxy start"
   },
@@ -25,6 +25,7 @@
     "rollup": "^3.23.0",
     "rollup-plugin-dts": "^5.3.0",
     "rollup-plugin-esbuild": "^5.0.0",
-    "typescript": "^5.0.4"
+    "typescript": "^5.0.4",
+    "ws": "^8.14.1"
   }
 }
