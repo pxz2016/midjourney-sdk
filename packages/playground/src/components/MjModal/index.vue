@@ -31,13 +31,13 @@
           >
             <DialogPanel
               :class="[
-                'bg-white p-6 shadow-xl transition-all w-full',
+                'bg-white p-6 shadow-xl transition-all w-full flex flex-col gap-2 overflow-hidden',
                 !fullscreen && 'rounded-md',
                 panelClass
               ]"
             >
               <DialogTitle
-                class="text-lg font-medium leading-6 text-gray-900 flex items-center justify-between"
+                class="text-lg font-medium leading-6 text-gray-900 flex items-center justify-between z-50"
               >
                 <span>{{ title }}</span>
                 <XMarkIcon class="w-5 h-5" @click="show = false" />

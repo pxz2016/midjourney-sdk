@@ -142,7 +142,6 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
       type === 'MESSAGE_DELETE' ||
       type === 'INTERACTION_IFRAME_MODAL_CREATE'
     ) {
-      console.log(data)
       this.handleMessage(type, data)
     }
     if (operate === 11) {
@@ -280,7 +279,6 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
       (parentId
         ? this.msgMap.getMsgByparentId(parentId)
         : this.msgMap.getMsgByContent(content))
-    console.log(msg, 'processingImage')
     if (!msg?.nonce) return
     let url = attachments.at(0)?.url
     if (url && this.opts.imgBaseUrl) {
@@ -303,7 +301,7 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
         id,
         url,
         originId,
-        content,
+        content: content.replace(/^\*\*regionNonce:\s\d+?,\s/, '**'),
         parentId,
         flags,
         components,

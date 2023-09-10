@@ -12,9 +12,10 @@ export const useMjStore = defineStore('midjourney', {
     mapping: {} as Record<MjMessage['id'], MjMessage>,
     varyRegionInfo: {
       varyRegionImgBase64: '',
-      varyRegionCustomId: ''
+      varyRegionCustomId: '',
+      varyRegionPrompt: ''
     },
-    openIframe: false
+    openVaryRegion: false
   }),
   actions: {
     async init(opts: MidJourneyOptions) {
@@ -23,17 +24,18 @@ export const useMjStore = defineStore('midjourney', {
     },
     handleMsg(type: MjMsgType, msg: MjMessage) {
       console.log(
-        `消息类型: ${type}, 事件ID: ${msg.nonce}, 消息ID: ${msg.id}, 父级ID: ${msg.parentId}, 原始ID: ${msg.originId}, 进度: ${msg.progress}`
+        `msgType: ${type}, eventId: ${msg.nonce}, msgId: ${msg.id}, parentId: ${msg.parentId}, originId: ${msg.originId}, progress: ${msg.progress}`
       )
       if (type === 'MESSAGE_DELETE') {
         delete this.mapping[msg.id]
       } else if (type === 'INTERACTION_IFRAME_MODAL_CREATE') {
-        // console.log(msg)
         msg.varyRegionImgBase64 &&
           (this.varyRegionInfo.varyRegionImgBase64 = msg.varyRegionImgBase64)
         msg.varyRegionCustomId &&
           (this.varyRegionInfo.varyRegionCustomId = msg.varyRegionCustomId)
-        this.openIframe = true
+        msg.varyRegionPrompt &&
+          (this.varyRegionInfo.varyRegionPrompt = msg.varyRegionPrompt)
+        this.openVaryRegion = true
       } else {
         this.mapping[msg.id] = msg
       }
