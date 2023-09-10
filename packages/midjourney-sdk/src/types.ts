@@ -89,6 +89,7 @@ export interface MjMessage {
   // Vary (Region)
   varyRegionCustomId?: string
   varyRegionImgBase64?: string
+  varyRegionPrompt?: string
   // other...
   [key: string]: any
 }

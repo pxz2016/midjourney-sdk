@@ -16,7 +16,14 @@ export default defineConfig({
     vue({ script: { defineModel: true } }),
     AutoImport({
       resolvers: [HeadlessUiResolver()],
-      imports: ['vue', 'pinia', '@vueuse/core'],
+      imports: [
+        'vue',
+        'pinia',
+        '@vueuse/core',
+        {
+          '@/components/MjToast': [['handleToast', 'MjToast']]
+        }
+      ],
       dirs: [r('src/stores')],
       dts: 'src/types/auto-import.d.ts'
     }),

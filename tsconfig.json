@@ -8,6 +8,7 @@
     "baseUrl": ".",
     "rootDir": ".",
     "paths": {
+      "@/*": ["packages/playground/src/*"],
       "midjourney-sdk": ["packages/midjourney-sdk/src"]
     },
     "moduleResolution": "Node",
@@ -18,8 +19,5 @@
     "types": ["node"],
     "noEmit": true
   },
-  "include": [
-    "packages/*/src",
-    "packages/global.d.ts"
-  ]
+  "include": ["packages/*/src", "packages/global.d.ts"]
 }

@@ -9,10 +9,13 @@
   },
   "dependencies": {
     "@headlessui/vue": "^1.7.16",
+    "@heroicons/vue": "^2.0.18",
+    "@types/paper": "^0.12.3",
     "@vueuse/core": "^10.4.1",
     "dayjs": "^1.11.9",
     "marked": "^8.0.0",
     "midjourney-sdk": "workspace:^3.0.0",
+    "paper": "^0.12.17",
     "pinia": "^2.1.6",
     "vite": "^4.4.9",
     "vue": "^3.3.4"

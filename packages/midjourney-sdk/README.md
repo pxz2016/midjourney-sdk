@@ -8,6 +8,11 @@ _It's useful for you, please give me open source power、support and star✨ thi
 
 [Live demo](https://laibaoyuan.github.io/midjourney-sdk)
 
+![](docs/241141694080315_.pic.jpg)
+![](docs/241131694080315_.pic.jpg)
+![](docs/WX20230910-140608@2x.png)
+![](docs/WX20230910-140737@2x.png)
+
 ## Support
 
 - Command

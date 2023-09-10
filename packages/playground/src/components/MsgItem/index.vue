@@ -59,7 +59,7 @@
 </template>
 
 <script setup lang="ts">
-import { MessageCallBack, MjMessage } from 'midjourney-sdk'
+import { MjMessage } from 'midjourney-sdk'
 import { dayjs } from '../../utils/dayjs'
 import * as marked from 'marked'
 defineProps<{ item: MjMessage }>()

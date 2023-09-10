@@ -142,7 +142,6 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
       type === 'MESSAGE_DELETE' ||
       type === 'INTERACTION_IFRAME_MODAL_CREATE'
     ) {
-      console.log(data)
       this.handleMessage(type, data)
     }
     if (operate === 11) {
@@ -184,14 +183,16 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
       }
       if (type === 'INTERACTION_IFRAME_MODAL_CREATE' && custom_id) {
         const varyRegionCustomId = custom_id.split('::')[2]
+        let varyRegionPrompt = ''
         // you need to configure the frontend proxy if you in the browser environment, you can see the proxy detail in `packages/playground/vite.config.ts` file.
         return this.opts
           .fetch(
             `${this.opts.discordsaysUrl}/inpaint/api/get-image-info/0/0/${varyRegionCustomId}`
           )
           .then((res) => res.json())
-          .then((res) =>
-            fetch(
+          .then((res) => {
+            varyRegionPrompt = res.prompt
+            return fetch(
               `${this.opts.discordsaysUrl}/inpaint${res.image_url?.replace(
                 /^\./,
                 ''
@@ -210,10 +211,11 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
               .then((varyRegionImgBase64) =>
                 this.emitNonce(nonce!, type, {
                   varyRegionCustomId,
+                  varyRegionPrompt,
                   varyRegionImgBase64: varyRegionImgBase64 as string
                 })
               )
-          )
+          })
       }
     }
     this.handleMessageUpdate('MESSAGE_CREATE', message)
@@ -277,7 +279,6 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
       (parentId
         ? this.msgMap.getMsgByparentId(parentId)
         : this.msgMap.getMsgByContent(content))
-    console.log(msg, 'processingImage')
     if (!msg?.nonce) return
     let url = attachments.at(0)?.url
     if (url && this.opts.imgBaseUrl) {
@@ -300,7 +301,7 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
         id,
         url,
         originId,
-        content,
+        content: content.replace(/^\*\*regionNonce:\s\d+?,\s/, '**'),
         parentId,
         flags,
         components,

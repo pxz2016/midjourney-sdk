@@ -1,6 +1,6 @@
 <template>
   <TransitionRoot appear :show="show" as="template">
-    <Dialog :open="show" @close="show = false" class="relative z-10">
+    <Dialog :open="show" @close="show = false" class="relative z-50">
       <TransitionChild
         as="template"
         enter="duration-300 ease-out"
@@ -10,12 +10,15 @@
         leave-from="opacity-100"
         leave-to="opacity-0"
       >
-        <div class="fixed inset-0 bg-black bg-opacity-25" />
+        <div class="fixed inset-0 bg-gray-600/60" />
       </TransitionChild>
 
       <div class="fixed inset-0 overflow-y-auto">
         <div
-          class="flex min-h-full items-center justify-center p-4 text-center"
+          :class="[
+            'flex min-h-full justify-center',
+            fullscreen ? 'h-full items-stretch' : 'p-4 items-center'
+          ]"
         >
           <TransitionChild
             as="template"
@@ -28,19 +31,18 @@
           >
             <DialogPanel
               :class="[
-                'w-1/2 transform overflow-hidden rounded-md bg-white p-6 text-left align-middle shadow-xl transition-all',
+                'bg-white p-6 shadow-xl transition-all w-full flex flex-col gap-2 overflow-hidden',
+                !fullscreen && 'rounded-md',
                 panelClass
               ]"
             >
               <DialogTitle
-                as="h3"
-                class="text-lg font-medium leading-6 text-gray-900"
+                class="text-lg font-medium leading-6 text-gray-900 flex items-center justify-between z-50"
               >
-                {{ title }}
+                <span>{{ title }}</span>
+                <XMarkIcon class="w-5 h-5" @click="show = false" />
               </DialogTitle>
-              <div class="my-2" v-if="$slots.default">
-                <slot />
-              </div>
+              <slot v-if="$slots.default" />
             </DialogPanel>
           </TransitionChild>
         </div>
@@ -50,8 +52,7 @@
 </template>
 
 <script setup lang="ts">
-defineProps<{ title: string; panelClass?: string }>()
+import { XMarkIcon } from '@heroicons/vue/24/solid'
+defineProps<{ title: string; panelClass?: string; fullscreen?: boolean }>()
 const show = defineModel<boolean>('show', { required: true })
 </script>
-
-<style scoped></style>

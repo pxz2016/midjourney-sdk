@@ -1,134 +1,94 @@
 <template>
-  <div class="flex flex-col gap-4">
+  <div class="flex-1 flex items-center justify-center absolute inset-0 h-full">
     <canvas
-      ref="editor"
-      :width="1000"
-      :height="800"
-      class="p-0 m-0 w-full max-w-[960px] select-none touch-none"
-      @mousedown="startDrawing"
-      @mouseup="stopDrawing"
-      @touchstart="startDrawing"
-      @touchend="stopDrawing"
+      ref="canvas"
+      hidpi="on"
+      width="1024"
+      height="1024"
+      resize
+      style="padding: 0px; margin: 0px; width: 100%; max-width: 960px"
     ></canvas>
-    <button class="border" @click="toDataURL">toDataURL</button>
-    <textarea v-model="base64" rows="10"></textarea>
+  </div>
+  <div class="fixed top-20 left-3 flex justify-center items-center">
+    <button class="btn border" @click="paper?.undo">
+      <SvgIcon icon-class="undo" class="w-5 h-5"></SvgIcon>
+    </button>
+  </div>
+  <div
+    id="appbody"
+    class="flex fixed inset-x-0 bottom-0 w-full items-end justify-between p-3 border gap-4"
+  >
+    <div class="flex gap-2">
+      <button
+        v-for="(v, i) in btns"
+        :key="i"
+        :class="['btn', selectedTool === v.value && '!bg-gray-400']"
+        @click="paper && (paper.selectedTool = v.value)"
+      >
+        <SvgIcon :icon-class="v.label" class="w-5 h-5"></SvgIcon>
+      </button>
+    </div>
+    <div class="flex items-end flex-1 gap-4">
+      <textarea
+        v-model="input"
+        ref="textarea"
+        class="resize-none overflow-hidden flex-1 !border-gray-200 rounded"
+        placeholder="send a prompt"
+      ></textarea>
+      <button class="btn flex-shrink-0" @click="handleSubmit">
+        <SvgIcon icon-class="send" class="w-5 h-5"></SvgIcon>
+      </button>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
+const emits = defineEmits<{
+  (e: 'submit', mask: string, prompt: string): void
+}>()
+import { MjPaper } from '@/utils/paper'
 const mj = useMjStore()
-const editor = ref<HTMLCanvasElement>()
-const ctx = computed(() => editor.value?.getContext('2d'))
-let baseImage = new Image()
-let maskImage = new Image()
-baseImage.src = mj.varyRegionInfo.varyRegionImgBase64
-maskImage.src = './checkerboard.png'
-const isDrawing = ref(false)
-const base64 = ref('')
-const position = reactive({
-  startX: 0,
-  startY: 0,
-  endX: 0,
-  endY: 0
+const canvas = ref<HTMLCanvasElement>()
+const { input, textarea } = useTextareaAutosize({
+  input: mj.varyRegionInfo.varyRegionPrompt
 })
-const selectedRegions = reactive<(typeof position)[]>([])
-let scaleInfo = reactive({
-  scaleFactor: 0,
-  scaledWidth: 0,
-  scaledHeight: 0
+const paper = ref<MjPaper>()
+const btns = reactive([
+  { label: 'rect', value: 0 },
+  { label: 'lasso', value: 0.5 }
+] as const)
+const selectedTool = computed(() => paper.value?.selectedTool)
+const getImg = () =>
+  new Promise<HTMLImageElement>((s) => {
+    const img = new Image()
+    img.src = mj.varyRegionInfo.varyRegionImgBase64
+    img.onload = () => s(img)
+  })
+
+const handleSubmit = () => {
+  if (!input.value.trim()) {
+    MjToast({ msg: 'image prompt is required', type: 'error', duration: 3000 })
+    return
+  }
+  paper.value
+    ?.submit()
+    .then((mask) => {
+      emits('submit', mask, input.value)
+    })
+    .catch((errMsg) => {
+      MjToast({ msg: errMsg, type: 'error', duration: 3000 })
+    })
+}
+onMounted(async () => {
+  if (canvas.value) {
+    const img = await getImg()
+    paper.value = new MjPaper(canvas.value, img)
+  }
 })
-
-const initImage = () => {
-  const ctx = editor.value?.getContext('2d')
-  baseImage.onload = function () {
-    scaleInfo.scaleFactor = Math.min(
-      editor.value!.width / baseImage.width,
-      editor.value!.height / baseImage.height
-    )
-    scaleInfo.scaledWidth = baseImage.width * scaleInfo.scaleFactor
-    scaleInfo.scaledHeight = baseImage.height * scaleInfo.scaleFactor
-    ctx?.drawImage(
-      baseImage,
-      0,
-      0,
-      scaleInfo.scaledWidth,
-      scaleInfo.scaledHeight
-    )
-  }
-}
-
-const startDrawing = (e: MouseEvent | TouchEvent) => {
-  isDrawing.value = true
-  position.startX =
-    ((e as TouchEvent).touches
-      ? (e as TouchEvent).touches[0].clientX
-      : (e as MouseEvent).clientX) - editor.value!.offsetLeft
-  position.startY =
-    ((e as TouchEvent).touches
-      ? (e as TouchEvent).touches[0].clientY
-      : (e as MouseEvent).clientY) - editor.value!.offsetTop
-}
-
-const stopDrawing = (e: MouseEvent | TouchEvent) => {
-  const ctx = editor.value?.getContext('2d')
-  if (isDrawing.value && ctx) {
-    position.endX =
-      ((e as TouchEvent).changedTouches
-        ? (e as TouchEvent).changedTouches[0].clientX
-        : (e as MouseEvent).clientX) - editor.value!.offsetLeft
-    position.endY =
-      ((e as TouchEvent).changedTouches
-        ? (e as TouchEvent).changedTouches[0].clientY
-        : (e as MouseEvent).clientY) - editor.value!.offsetTop
-    const { startX, startY, endX, endY } = position
-    let regionWidth = endX - startX,
-      regionHeight = endY - startY
-    let sourceMaskWidth = regionWidth / scaleInfo.scaleFactor
-    let sourceMaskHeight = regionHeight / scaleInfo.scaleFactor
-    // ctx.globalAlpha = 0.5
-    ctx.drawImage(
-      maskImage,
-      0,
-      0,
-      sourceMaskWidth,
-      sourceMaskHeight,
-      startX,
-      startY,
-      regionWidth,
-      regionHeight
-    )
-    // ctx.globalAlpha = 1.0
-    selectedRegions.push({ startX, startY, endX, endY })
-  }
-  isDrawing.value = false
-}
-
-const toDataURL = () => {
-  if (ctx.value && editor.value) {
-    ctx.value.fillStyle = 'black'
-    ctx.value.fillRect(0, 0, scaleInfo.scaledWidth, scaleInfo.scaledHeight)
-
-    // Fill white for selected regions
-    ctx.value.fillStyle = 'white'
-    for (let region of selectedRegions) {
-      ctx.value.fillRect(
-        region.startX,
-        region.startY,
-        region.endX - region.startX,
-        region.endY - region.startY
-      )
-    }
-    base64.value = editor.value.toDataURL('image/png')
-    mj.ins?.api.varyRegion(
-      mj.varyRegionInfo.varyRegionCustomId,
-      'orange',
-      base64.value,
-      mj.handleMsg
-    )
-  }
-}
-
-onMounted(initImage)
 </script>
 
-<style scoped></style>
+<style scoped>
+.btn {
+  @apply p-2 rounded-full bg-gray-400/70 text-white;
+}
+</style>

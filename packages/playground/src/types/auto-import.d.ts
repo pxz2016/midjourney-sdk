@@ -6,9 +6,7 @@
 export {}
 declare global {
   const EffectScope: typeof import('vue')['EffectScope']
-  const ElLoading: typeof import('element-plus')['ElLoading']
-  const ElMessage: typeof import('element-plus')['ElMessage']
-  const ElMessageBox: typeof import('element-plus')['ElMessageBox']
+  const MjToast: typeof import('@/components/MjToast')['handleToast']
   const acceptHMRUpdate: typeof import('pinia')['acceptHMRUpdate']
   const asyncComputed: typeof import('@vueuse/core')['asyncComputed']
   const autoResetRef: typeof import('@vueuse/core')['autoResetRef']
@@ -44,7 +42,6 @@ declare global {
   const h: typeof import('vue')['h']
   const ignorableWatch: typeof import('@vueuse/core')['ignorableWatch']
   const inject: typeof import('vue')['inject']
-  const ins: typeof import('../stores/mj')['ins']
   const isDefined: typeof import('@vueuse/core')['isDefined']
   const isProxy: typeof import('vue')['isProxy']
   const isReactive: typeof import('vue')['isReactive']
