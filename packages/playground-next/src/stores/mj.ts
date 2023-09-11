@@ -27,11 +27,11 @@ export const useMjStore = create<IMjStore>((set, get) => ({
   ins: null,
   mapping: {},
   varyRegionInfo: {
-    varyRegionImgBase64: './0_0.webp',
+    varyRegionImgBase64: '',
     varyRegionCustomId: '',
     varyRegionPrompt: ''
   },
-  openVaryRegion: true,
+  openVaryRegion: false,
   async init(opts) {
     let ins = await new MidJourney(opts).init()
     set(() => ({ ins }))
