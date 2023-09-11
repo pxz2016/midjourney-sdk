@@ -1,10 +1,10 @@
 {
   "private": true,
-  "version": "3.0.1",
+  "version": "3.0.2",
   "packageManager": "pnpm@7.18.2",
   "type": "module",
   "scripts": {
-    "dev": "run-p dev:sdk dev:playground",
+    "dev": "run-p dev:sdk dev:playground-next",
     "dev:sdk": "node scripts/dev",
     "dev:playground-next": "pnpm -F playground-next dev",
     "dev:playground-vue": "pnpm -F playground-vue dev",
