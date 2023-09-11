@@ -5,12 +5,13 @@
   "type": "module",
   "scripts": {
     "dev": "run-p dev:sdk dev:playground",
-    "build": "run-s build:sdk build:playground",
     "dev:sdk": "node scripts/dev",
-    "dev:playground": "pnpm -F playground-next dev",
+    "dev:playground-next": "pnpm -F playground-next dev",
+    "dev:playground-vue": "pnpm -F playground-vue dev",
+    "build": "run-s build:sdk build:playground-next",
     "build:sdk": "tsc --noEmit && rollup --config rollup.config.ts --configPlugin esbuild",
-    "build:playground": "pnpm -F playground2 build",
-    "format": "prettier --check --write .",
+    "build:playground-next": "pnpm -F playground-next build",
+    "build:playground-vue": "pnpm -F playground-vue build",
     "proxy": "pnpm -F proxy start"
   },
   "devDependencies": {

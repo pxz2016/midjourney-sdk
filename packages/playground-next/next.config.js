@@ -10,8 +10,16 @@ const nextConfig = {
   experimental: {
     esmExternals: 'loose'
   },
-  rewrites: {
-    
+  rewrites: async () => {
+    return {
+      beforeFiles: [
+        {
+          source: '/inpaint/:path*',
+          destination:
+            'https://936929561302675456.discordsays.com/inpaint/:path*'
+        }
+      ]
+    }
   }
 }
 

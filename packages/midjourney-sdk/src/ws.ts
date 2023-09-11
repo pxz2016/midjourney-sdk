@@ -189,32 +189,33 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
           .fetch(
             `${this.opts.discordsaysUrl}/inpaint/api/get-image-info/0/0/${varyRegionCustomId}`
           )
-          .then((res) => res.json())
-          .then((res) => {
-            varyRegionPrompt = res.prompt
-            return fetch(
-              `${this.opts.discordsaysUrl}/inpaint${res.image_url?.replace(
-                /^\./,
-                ''
-              )}`
-            )
-              .then((res) => res.blob())
-              .then(
-                (blob) =>
-                  new Promise<FileReader['result']>((resolve, reject) => {
-                    const reader = new FileReader()
-                    reader.onload = (e) => e.target && resolve(e.target.result)
-                    reader.onerror = reject
-                    reader.readAsDataURL(blob)
-                  })
+          .then(async (res) => {
+            if (res.ok) {
+              const json = await res.json()
+              varyRegionPrompt = json.prompt
+              const varyRegionImgBase64 = await fetch(
+                `${this.opts.discordsaysUrl}/inpaint${json.image_url?.replace(
+                  /^\./,
+                  ''
+                )}`
               )
-              .then((varyRegionImgBase64) =>
-                this.emitNonce(nonce!, type, {
-                  varyRegionCustomId,
-                  varyRegionPrompt,
-                  varyRegionImgBase64: varyRegionImgBase64 as string
-                })
-              )
+                .then((res) => res.blob())
+                .then(
+                  (blob) =>
+                    new Promise<FileReader['result']>((resolve, reject) => {
+                      const reader = new FileReader()
+                      reader.onload = (e) =>
+                        e.target && resolve(e.target.result)
+                      reader.onerror = reject
+                      reader.readAsDataURL(blob)
+                    })
+                )
+              this.emitNonce(nonce!, type, {
+                varyRegionCustomId,
+                varyRegionPrompt,
+                varyRegionImgBase64: varyRegionImgBase64 as string
+              })
+            }
           })
       }
     }

@@ -8,15 +8,14 @@ import { useEffect, useRef, useState } from 'react'
 import { useMjStore } from '@/stores/mj'
 import clsx from 'clsx'
 
-export default function InpaintingEditor() {
+export default function InpaintingEditor({
+  submit
+}: {
+  submit: (mask: string, prompt: string) => void
+}) {
   const [paper, setPaper] = useState<MjPaper | null>(null)
   const canvas = useRef<HTMLCanvasElement>(null)
-  const [ins, handleMsg, varyRegionInfo] = useMjStore((state) => [
-    state.ins,
-    state.handleMsg,
-    state.varyRegionInfo
-  ])
-  const [selectedTool, setTool] = useState(0)
+  const varyRegionInfo = useMjStore((state) => state.varyRegionInfo)
   const [input, setInput] = useState(varyRegionInfo.varyRegionPrompt)
   const btns = [
     { label: 'rect', value: 0, icon: Rect },
@@ -25,13 +24,14 @@ export default function InpaintingEditor() {
   const getImg = () =>
     new Promise<HTMLImageElement>((s) => {
       const img = new Image()
-      img.src = './0_0.webp'
+      img.src = varyRegionInfo.varyRegionImgBase64
       img.onload = () => s(img)
     })
   const init = async () => {
     if (canvas.current) {
       const img = await getImg()
-      setPaper(new MjPaper(canvas.current, img))
+      const paper = new MjPaper(canvas.current, img)
+      setPaper(paper)
     }
   }
   const handleSubmit = () => {
@@ -45,9 +45,7 @@ export default function InpaintingEditor() {
     }
     paper
       ?.submit()
-      .then((mask) => {
-        // emits('submit', mask, input.value)
-      })
+      .then((mask) => submit(mask, input))
       .catch((errMsg) => {
         // MjToast({ msg: errMsg, type: 'error', duration: 3000 })
       })
@@ -55,17 +53,13 @@ export default function InpaintingEditor() {
   useEffect(() => {
     init()
   }, [])
-  useEffect(() => {
-    console.log('selectedTool')
-    // paper && setTool(paper.selectedTool)
-  }, [paper?.selectedTool])
   return (
     <>
       <div className="flex-1 flex items-center justify-center absolute inset-0 h-full">
         <canvas
-          ref={canvas}
           //@ts-ignore
           hidpi="on"
+          ref={canvas}
           width="1024"
           height="1024"
           resize="true"
@@ -92,10 +86,13 @@ export default function InpaintingEditor() {
               key={i}
               className={clsx(
                 'editor-btn',
-                selectedTool === v.value && '!bg-gray-400'
+                paper?.selectedTool === v.value && '!bg-gray-400'
               )}
               onClick={() => {
-                paper && (paper.selectedTool = v.value)
+                paper &&
+                  setPaper((paper) =>
+                    Object.assign(paper!, { selectedTool: v.value })
+                  )
               }}
             >
               <v.icon className="w-5 h-5" />

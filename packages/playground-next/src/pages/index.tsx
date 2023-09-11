@@ -7,14 +7,32 @@ import MjModal from '@/components/mj-modal'
 import InpaintingEditor from '@/components/inpainting-editor'
 
 export default function Home() {
-  const [ins, mapping, openVaryRegion, setOpenVaryRegion] = useMjStore(
-    (state) => [
-      state.ins,
-      state.mapping,
-      state.openVaryRegion,
-      state.setOpenVaryRegion
-    ]
-  )
+  const [
+    ins,
+    mapping,
+    openVaryRegion,
+    setOpenVaryRegion,
+    varyRegionInfo,
+    handleMsg
+  ] = useMjStore((state) => [
+    state.ins,
+    state.mapping,
+    state.openVaryRegion,
+    state.setOpenVaryRegion,
+    state.varyRegionInfo,
+    state.handleMsg
+  ])
+  const handleSubmit = (mask: string, prompt: string) => {
+    if (ins && varyRegionInfo.varyRegionCustomId && mask && prompt) {
+      ins.api.varyRegion(
+        varyRegionInfo.varyRegionCustomId,
+        prompt,
+        mask,
+        handleMsg
+      )
+      setOpenVaryRegion(false)
+    }
+  }
   return (
     <div className="pb-[10vh] pt-5 bg-gray-950/80 text-white h-full w-full relative overflow-auto">
       <Welcome />
@@ -36,7 +54,7 @@ export default function Home() {
         title="Vary（Region）"
         fullscreen
       >
-        <InpaintingEditor />
+        <InpaintingEditor submit={handleSubmit} />
       </MjModal>
     </div>
   )
