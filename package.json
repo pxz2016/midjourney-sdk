@@ -12,7 +12,8 @@
     "build:sdk": "tsc --noEmit && rollup --config rollup.config.ts --configPlugin esbuild",
     "build:playground-next": "pnpm -F playground-next build",
     "build:playground-vue": "pnpm -F playground-vue build",
-    "proxy": "pnpm -F proxy start"
+    "proxy": "pnpm -F proxy start",
+    "postinstall": "pnpm build:sdk"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^25.0.0",
