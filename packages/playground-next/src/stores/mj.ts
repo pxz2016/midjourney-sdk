@@ -1,4 +1,3 @@
-import { MessageInstance } from 'antd/es/message/interface'
 import {
   MidJourney,
   MidJourneyOptions,

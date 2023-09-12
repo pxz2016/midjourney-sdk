@@ -41,6 +41,7 @@ export default function InpaintingEditor({
       ctx?.ins.error('image prompt is required')
       return
     }
+    ctx?.setJobLoading(true)
     paper
       ?.submit()
       .then((mask) => submit(mask, input))

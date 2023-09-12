@@ -1,3 +1,4 @@
+import { useMjStore } from '@/stores/mj'
 import { message } from 'antd'
 import { MessageInstance } from 'antd/es/message/interface'
 import { MjMsgType } from 'midjourney-sdk'
@@ -25,9 +26,9 @@ export const MessageProvider = ({
         ins: messageApi,
         handJobMsg(type) {
           if (type === 'REQUEST_SUCCESS')
-            messageApi?.success('job create success!')
+            messageApi?.success('job execute success!')
           else if (type === 'REQUEST_FAILED')
-            messageApi?.error('job create failed!')
+            messageApi?.error('job execute failed!')
           setJobLoading(false)
         }
       }}

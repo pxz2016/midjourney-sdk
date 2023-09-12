@@ -9,7 +9,7 @@ import {
   MjOriginMessage
 } from './types'
 import { MidjourneyMsgMap } from './msgMap'
-import { matchRegionNonce } from './utils'
+import { formatComponents, matchRegionNonce } from './utils'
 
 export class MidjourneyWs extends EventEmitter<MjEvents> {
   wsClient: WebSocket
@@ -232,6 +232,7 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
       content,
       interaction = {} as MjOriginMessage['interaction'],
       nonce,
+      flags,
       components = [],
       embeds = [],
       id
@@ -244,7 +245,8 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
           case 'settings':
             this.emitNonce(msg.nonce, type, {
               id,
-              components,
+              flags,
+              components: formatComponents(components),
               progress: 100
             })
             return
@@ -310,7 +312,7 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
         content: content.replace(/^\*\*regionNonce:\s\d+?,\s/, '**'),
         parentId,
         flags,
-        components,
+        components: formatComponents(components),
         progress,
         timestamp
       })

@@ -37,11 +37,18 @@ export default function Home() {
         mask,
         (type, msg) => handleMsg(type, msg, ctx?.handJobMsg)
       )
+      setOpenVaryRegion(false)
     }
   }
   return (
-    <Spin size="large" spinning={ctx?.jobLoading} tip="job creating...">
-      <div className="pb-[10vh] pt-5 bg-gray-950/80 text-white h-full w-full relative overflow-auto">
+    <Spin
+      size="large"
+      spinning={ctx?.jobLoading}
+      tip="job executing..."
+      className="!max-h-none"
+      wrapperClassName="h-full"
+    >
+      <div className="pb-[10vh] bg-gray-950/80 text-white h-full w-full relative overflow-auto">
         {hy && (
           <>
             <Welcome />
