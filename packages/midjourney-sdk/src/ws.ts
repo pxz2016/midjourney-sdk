@@ -51,17 +51,22 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
       )(
         `discord wsClient was close, error code: ${code}, error reason: ${reason}`
       )
-      this.reconnectionTask = setTimeout(() => {
-        this.opts.debug?.(
-          'MidjourneyWs',
-          'connect'
-        )('discord wsClient reconnect...')
-        if (this.heartbeatTask && typeof this.heartbeatTask === 'number') {
-          clearInterval(this.heartbeatTask)
-          this.heartbeatTask = null
-        }
-        this.wsClient = this.connect.call(this)
-      }, 4000)
+      if (code === 4004) {
+        // Authorization faild
+        this.emit('READY', new Error(reason))
+      } else {
+        this.reconnectionTask = setTimeout(() => {
+          this.opts.debug?.(
+            'MidjourneyWs',
+            'connect'
+          )('discord wsClient reconnect...')
+          if (this.heartbeatTask && typeof this.heartbeatTask === 'number') {
+            clearInterval(this.heartbeatTask)
+            this.heartbeatTask = null
+          }
+          this.wsClient = this.connect.call(this)
+        }, 4000)
+      }
     })
     return wsClient
   }
@@ -340,8 +345,8 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
   }
 
   waitReady() {
-    return new Promise<MjOriginMessage['user']>((s) => {
-      this.once('READY', s)
+    return new Promise<MjOriginMessage['user']>((s, j) => {
+      this.once('READY', (res) => (res instanceof Error ? j(res) : s(res)))
     })
   }
 

@@ -5,6 +5,10 @@ import Footer from '@/components/footer'
 import MsgItem from '@/components/msg-item'
 import MjModal from '@/components/mj-modal'
 import InpaintingEditor from '@/components/inpainting-editor'
+import { MessageContent } from '@/content/message'
+import { useContext } from 'react'
+import { Spin } from 'antd'
+import { useHydrated } from '@/hooks'
 
 export default function Home() {
   const [
@@ -22,40 +26,48 @@ export default function Home() {
     state.varyRegionInfo,
     state.handleMsg
   ])
+  const ctx = useContext(MessageContent)
+  const hy = useHydrated()
   const handleSubmit = (mask: string, prompt: string) => {
     if (ins && varyRegionInfo.varyRegionCustomId && mask && prompt) {
+      ctx?.setJobLoading(true)
       ins.api.varyRegion(
         varyRegionInfo.varyRegionCustomId,
         prompt,
         mask,
-        handleMsg
+        (type, msg) => handleMsg(type, msg, ctx?.handJobMsg)
       )
-      setOpenVaryRegion(false)
     }
   }
   return (
-    <div className="pb-[10vh] pt-5 bg-gray-950/80 text-white h-full w-full relative overflow-auto">
-      <Welcome />
-      {!ins?.initialize ? (
-        <MjForm />
-      ) : (
-        <>
-          <div className="flex flex-col gap-4">
-            {Object.entries(mapping).map(([k, v]) => (
-              <MsgItem key={k} item={v} />
-            ))}
-          </div>
-          <Footer />
-        </>
-      )}
-      <MjModal
-        show={openVaryRegion}
-        setOpen={setOpenVaryRegion}
-        title="Vary（Region）"
-        fullscreen
-      >
-        <InpaintingEditor submit={handleSubmit} />
-      </MjModal>
-    </div>
+    <Spin size="large" spinning={ctx?.jobLoading} tip="job creating...">
+      <div className="pb-[10vh] pt-5 bg-gray-950/80 text-white h-full w-full relative overflow-auto">
+        {hy && (
+          <>
+            <Welcome />
+            {!ins?.initialize ? (
+              <MjForm />
+            ) : (
+              <>
+                <div className="flex flex-col gap-4">
+                  {Object.entries(mapping).map(([k, v]) => (
+                    <MsgItem key={k} item={v} />
+                  ))}
+                </div>
+                <Footer />
+              </>
+            )}
+            <MjModal
+              show={openVaryRegion}
+              setOpen={setOpenVaryRegion}
+              title="Vary（Region）"
+              fullscreen
+            >
+              <InpaintingEditor submit={handleSubmit} />
+            </MjModal>
+          </>
+        )}
+      </div>
+    </Spin>
   )
 }

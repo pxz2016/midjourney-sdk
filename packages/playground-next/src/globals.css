@@ -32,3 +32,7 @@ canvas[resize] {
 .editor-btn {
   @apply p-2 rounded-full bg-gray-400/70 text-white;
 }
+
+.mj-form label {
+  @apply !text-white;
+}

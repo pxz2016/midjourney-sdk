@@ -1,3 +1,4 @@
+import { MessageInstance } from 'antd/es/message/interface'
 import {
   MidJourney,
   MidJourneyOptions,
@@ -20,7 +21,11 @@ export interface IMjStore {
     updater: (mapping: Record<MjMessage['id'], MjMessage>) => void
   ) => void
   setOpenVaryRegion: (openVaryRegion: boolean) => void
-  handleMsg: (type: MjMsgType, msg: MjMessage) => void
+  handleMsg: (
+    type: MjMsgType,
+    msg: MjMessage,
+    cb?: (type: MjMsgType) => void
+  ) => void
 }
 
 export const useMjStore = create<IMjStore>((set, get) => ({
@@ -33,8 +38,7 @@ export const useMjStore = create<IMjStore>((set, get) => ({
   },
   openVaryRegion: false,
   async init(opts) {
-    let ins = await new MidJourney(opts).init()
-    set(() => ({ ins }))
+    return new MidJourney(opts).init().then((ins) => set(() => ({ ins })))
   },
   setOpenVaryRegion(openVaryRegion) {
     set({ openVaryRegion })
@@ -44,11 +48,13 @@ export const useMjStore = create<IMjStore>((set, get) => ({
     updater(mapping)
     set({ mapping })
   },
-  handleMsg(type, msg) {
+  handleMsg(type, msg, cb) {
     console.log(
       `msgType: ${type}, eventId: ${msg.nonce}, msgId: ${msg.id}, parentId: ${msg.parentId}, originId: ${msg.originId}, progress: ${msg.progress}`
     )
-    if (type === 'MESSAGE_DELETE') {
+    if (type === 'REQUEST_SUCCESS' || type === 'REQUEST_FAILED') {
+      cb?.(type)
+    } else if (type === 'MESSAGE_DELETE') {
       get().updateMapping((mapping) => {
         delete mapping[msg.id]
       })

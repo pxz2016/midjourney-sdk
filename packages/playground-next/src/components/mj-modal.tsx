@@ -20,7 +20,12 @@ export default function MjModal({
 }) {
   return (
     <Transition.Root appear show={show} as={Fragment}>
-      <Dialog open={show} onClose={setOpen} className="relative z-50">
+      <Dialog
+        unmount={false}
+        open={show}
+        onClose={setOpen}
+        className="relative z-50"
+      >
         <Transition.Child
           as={Fragment}
           enter="duration-300 ease-out"

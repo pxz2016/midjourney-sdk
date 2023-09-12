@@ -1,11 +1,11 @@
 import type { AppProps } from 'next/app'
 import '../globals.css'
-import MjToast from '@/components/mj-toast'
+import { MessageProvider } from '@/content/message'
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
-    <MjToast>
+    <MessageProvider>
       <Component {...pageProps} />
-    </MjToast>
+    </MessageProvider>
   )
 }

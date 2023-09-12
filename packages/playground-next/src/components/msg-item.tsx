@@ -3,9 +3,12 @@ import { dayjs } from '../utils/dayjs'
 import clsx from 'clsx'
 import ReactMarkdown from 'react-markdown'
 import { useMjStore } from '@/stores/mj'
+import { useContext } from 'react'
+import { MessageContent } from '@/content/message'
 
 export default function MsgItem({ item }: { item: MjMessage }) {
   const [ins, handleMsg] = useMjStore((state) => [state.ins, state.handleMsg])
+  const ctx = useContext(MessageContent)
   return (
     <div className="flex flex-col gap-2 border-l-2 border-yellow-500 py-5 px-16 bg-yellow-500/10">
       <div className="flex flex-col relative">
@@ -48,11 +51,12 @@ export default function MsgItem({ item }: { item: MjMessage }) {
                   key={ci}
                   data-style={cv.style}
                   onClick={() => {
+                    ctx?.setJobLoading(true)
                     ins?.api.action(
                       item.id,
                       cv.custom_id,
                       item.flags!,
-                      handleMsg
+                      (type, msg) => handleMsg(type, msg, ctx?.handJobMsg)
                     )
                   }}
                 >
