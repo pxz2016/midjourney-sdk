@@ -9,7 +9,7 @@ import {
   MjOriginMessage
 } from './types'
 import { MidjourneyMsgMap } from './msgMap'
-import { matchRegionNonce } from './utils'
+import { formatComponents, matchRegionNonce } from './utils'
 
 export class MidjourneyWs extends EventEmitter<MjEvents> {
   wsClient: WebSocket
@@ -51,17 +51,22 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
       )(
         `discord wsClient was close, error code: ${code}, error reason: ${reason}`
       )
-      this.reconnectionTask = setTimeout(() => {
-        this.opts.debug?.(
-          'MidjourneyWs',
-          'connect'
-        )('discord wsClient reconnect...')
-        if (this.heartbeatTask && typeof this.heartbeatTask === 'number') {
-          clearInterval(this.heartbeatTask)
-          this.heartbeatTask = null
-        }
-        this.wsClient = this.connect.call(this)
-      }, 4000)
+      if (code === 4004) {
+        // Authorization faild
+        this.emit('READY', new Error(reason))
+      } else {
+        this.reconnectionTask = setTimeout(() => {
+          this.opts.debug?.(
+            'MidjourneyWs',
+            'connect'
+          )('discord wsClient reconnect...')
+          if (this.heartbeatTask && typeof this.heartbeatTask === 'number') {
+            clearInterval(this.heartbeatTask)
+            this.heartbeatTask = null
+          }
+          this.wsClient = this.connect.call(this)
+        }, 4000)
+      }
     })
     return wsClient
   }
@@ -227,6 +232,7 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
       content,
       interaction = {} as MjOriginMessage['interaction'],
       nonce,
+      flags,
       components = [],
       embeds = [],
       id
@@ -239,7 +245,8 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
           case 'settings':
             this.emitNonce(msg.nonce, type, {
               id,
-              components,
+              flags,
+              components: formatComponents(components),
               progress: 100
             })
             return
@@ -305,7 +312,7 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
         content: content.replace(/^\*\*regionNonce:\s\d+?,\s/, '**'),
         parentId,
         flags,
-        components,
+        components: formatComponents(components),
         progress,
         timestamp
       })
@@ -340,8 +347,8 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
   }
 
   waitReady() {
-    return new Promise<MjOriginMessage['user']>((s) => {
-      this.once('READY', s)
+    return new Promise<MjOriginMessage['user']>((s, j) => {
+      this.once('READY', (res) => (res instanceof Error ? j(res) : s(res)))
     })
   }
 

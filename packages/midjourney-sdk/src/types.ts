@@ -99,7 +99,7 @@ export interface MessageCallBack {
 }
 
 export interface MjEvents extends Record<string, MessageCallBack> {
-  READY: (user: MjOriginMessage['user']) => void
+  READY: (res: any) => void
   WS_OPEN: () => void
   WS_ERROR: (error: string) => void
   WS_CLOSE: () => void
@@ -107,6 +107,8 @@ export interface MjEvents extends Record<string, MessageCallBack> {
 
 export type MjMsgType =
   | 'READY'
+  | 'REQUEST_SUCCESS'
+  | 'REQUEST_FAILED'
   | 'MESSAGE_CREATE'
   | 'MESSAGE_UPDATE'
   | 'MESSAGE_DELETE'

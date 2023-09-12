@@ -1,11 +1,14 @@
 import type { AppProps } from 'next/app'
 import '../globals.css'
-import MjToast from '@/components/mj-toast'
+import { MessageProvider } from '@/content/message'
+import { StyleProvider } from '@ant-design/cssinjs'
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
-    <MjToast>
-      <Component {...pageProps} />
-    </MjToast>
+    <StyleProvider hashPriority="high">
+      <MessageProvider>
+        <Component {...pageProps} />
+      </MessageProvider>
+    </StyleProvider>
   )
 }

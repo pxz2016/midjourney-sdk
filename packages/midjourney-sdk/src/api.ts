@@ -7,16 +7,23 @@ export class MidjourneyApi extends MidjourneyCommand {
     super(opts)
   }
 
-  private interactions(payload: any) {
+  private interactions(payload: any, cb?: MessageCallBack) {
     const headers = {
       'Content-Type': 'application/json',
       Authorization: this.opts.token
     }
-    return this.opts.fetch(`${this.opts.apiBaseUrl}/api/v9/interactions`, {
-      method: 'POST',
-      body: JSON.stringify(payload),
-      headers
-    })
+    return this.opts
+      .fetch(`${this.opts.apiBaseUrl}/api/v9/interactions`, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+        headers
+      })
+      .then((res) =>
+        res.ok
+          ? cb?.('REQUEST_SUCCESS', res as any)
+          : cb?.('REQUEST_FAILED', res as any)
+      )
+      .catch((err) => cb?.('REQUEST_FAILED', err))
   }
 
   private getPayload(
@@ -42,13 +49,17 @@ export class MidjourneyApi extends MidjourneyCommand {
     )
   }
 
-  private inpaint(customId: string, prompt: string, mask: string) {
+  private inpaint(
+    customId: string,
+    prompt: string,
+    mask: string,
+    cb?: MessageCallBack
+  ) {
     const headers = {
       'Content-Type': 'application/json'
     }
-    return this.opts.fetch(
-      `${this.opts.discordsaysUrl}/inpaint/api/submit-job`,
-      {
+    return this.opts
+      .fetch(`${this.opts.discordsaysUrl}/inpaint/api/submit-job`, {
         method: 'POST',
         body: JSON.stringify({
           customId,
@@ -59,8 +70,13 @@ export class MidjourneyApi extends MidjourneyCommand {
           full_prompt: null
         }),
         headers
-      }
-    )
+      })
+      .then((res) =>
+        res.ok
+          ? cb?.('REQUEST_SUCCESS', res as any)
+          : cb?.('REQUEST_FAILED', res as any)
+      )
+      .catch((err) => cb?.('REQUEST_FAILED', err))
   }
 
   async imagine(value: string, cb?: MessageCallBack) {
@@ -72,7 +88,7 @@ export class MidjourneyApi extends MidjourneyCommand {
         })
       )
       return Promise.all([
-        this.interactions(payload),
+        this.interactions(payload, cb),
         this.opts.ws?.waitMessage({ nonce: payload.nonce, cb })
       ]).then(([_, res]) => res)
     })
@@ -96,7 +112,7 @@ export class MidjourneyApi extends MidjourneyCommand {
       }
     )
     return Promise.all([
-      this.interactions(payload),
+      this.interactions(payload, cb),
       this.opts.ws?.waitMessage({
         nonce: payload.nonce,
         cb,
@@ -113,7 +129,7 @@ export class MidjourneyApi extends MidjourneyCommand {
   ) {
     const nonce = nextNonce()
     return Promise.all([
-      this.inpaint(customId, `regionNonce: ${nonce}, ${prompt}`, mask),
+      this.inpaint(customId, `regionNonce: ${nonce}, ${prompt}`, mask, cb),
       this.opts.ws?.waitMessage({ nonce, cb })
     ]).then(([_, msg]) => msg)
   }
@@ -122,7 +138,7 @@ export class MidjourneyApi extends MidjourneyCommand {
     return this.getCommand('info').then((command) => {
       const payload = this.getPayload(2, command)
       return Promise.all([
-        this.interactions(payload),
+        this.interactions(payload, cb),
         this.opts.ws?.waitMessage({ nonce: payload.nonce, cb })
       ]).then(([_, msg]) => msg)
     })
@@ -132,7 +148,7 @@ export class MidjourneyApi extends MidjourneyCommand {
     return this.getCommand('settings').then((command) => {
       const payload = this.getPayload(2, command)
       return Promise.all([
-        this.interactions(payload),
+        this.interactions(payload, cb),
         this.opts.ws?.waitMessage({ nonce: payload.nonce, cb })
       ]).then(([_, msg]) => msg)
     })
@@ -142,7 +158,7 @@ export class MidjourneyApi extends MidjourneyCommand {
     return this.getCommand('fast').then((command) => {
       const payload = this.getPayload(2, command)
       return Promise.all([
-        this.interactions(payload),
+        this.interactions(payload, cb),
         this.opts.ws?.waitMessage({ nonce: payload.nonce, cb })
       ]).then(([_, msg]) => msg)
     })
@@ -152,7 +168,7 @@ export class MidjourneyApi extends MidjourneyCommand {
     return this.getCommand('relax').then((command) => {
       const payload = this.getPayload(2, command)
       return Promise.all([
-        this.interactions(payload),
+        this.interactions(payload, cb),
         this.opts.ws?.waitMessage({ nonce: payload.nonce, cb })
       ]).then(([_, msg]) => msg)
     })

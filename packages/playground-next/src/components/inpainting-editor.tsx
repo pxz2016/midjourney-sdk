@@ -4,9 +4,10 @@ import Undo from '@/icons/undo.svg'
 import Send from '@/icons/send.svg'
 import Rect from '@/icons/rect.svg'
 import Lasso from '@/icons/lasso.svg'
-import { useEffect, useRef, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import { useMjStore } from '@/stores/mj'
 import clsx from 'clsx'
+import { MessageContent } from '@/content/message'
 
 export default function InpaintingEditor({
   submit
@@ -17,6 +18,7 @@ export default function InpaintingEditor({
   const canvas = useRef<HTMLCanvasElement>(null)
   const varyRegionInfo = useMjStore((state) => state.varyRegionInfo)
   const [input, setInput] = useState(varyRegionInfo.varyRegionPrompt)
+  const ctx = useContext(MessageContent)
   const btns = [
     { label: 'rect', value: 0, icon: Rect },
     { label: 'lasso', value: 0.5, icon: Lasso }
@@ -36,19 +38,14 @@ export default function InpaintingEditor({
   }
   const handleSubmit = () => {
     if (!input.trim()) {
-      //   MjToast({
-      //     msg: 'image prompt is required',
-      //     type: 'error',
-      //     duration: 3000
-      //   })
+      ctx?.ins.error('image prompt is required')
       return
     }
+    ctx?.setJobLoading(true)
     paper
       ?.submit()
       .then((mask) => submit(mask, input))
-      .catch((errMsg) => {
-        // MjToast({ msg: errMsg, type: 'error', duration: 3000 })
-      })
+      .catch((errMsg) => ctx?.ins.error(errMsg))
   }
   useEffect(() => {
     init()

@@ -39,9 +39,9 @@ pnpm i midjourney-sdk
 ```typescript
 import { MidJourney } from 'midjourney-sdk'
 const ins = new MidJourney({
-  token: import.meta.env.VITE_TOKEN,
-  guild_id: import.meta.env.VITE_GUILD_ID,
-  channel_id: import.meta.env.VITE_CHANNEL_ID,
+  token: process.env.NEXT_PUBLIC_TOKEN,
+  guild_id: process.env.NEXT_PUBLIC_GUILD_ID,
+  channel_id: process.env.NEXT_PUBLIC_CHANNEL_ID,
   skipHeartbeat: true
 })
 ;(async () => {

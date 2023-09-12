@@ -2,10 +2,15 @@ import { MjMessage } from 'midjourney-sdk'
 import { dayjs } from '../utils/dayjs'
 import clsx from 'clsx'
 import ReactMarkdown from 'react-markdown'
+import RemarkBreaks from 'remark-breaks'
 import { useMjStore } from '@/stores/mj'
+import { useContext } from 'react'
+import { MessageContent } from '@/content/message'
+import { Image } from 'antd'
 
 export default function MsgItem({ item }: { item: MjMessage }) {
   const [ins, handleMsg] = useMjStore((state) => [state.ins, state.handleMsg])
+  const ctx = useContext(MessageContent)
   return (
     <div className="flex flex-col gap-2 border-l-2 border-yellow-500 py-5 px-16 bg-yellow-500/10">
       <div className="flex flex-col relative">
@@ -20,24 +25,31 @@ export default function MsgItem({ item }: { item: MjMessage }) {
           </span>
         </div>
         {item.content && (
-          <ReactMarkdown className="text-sm">{item.content}</ReactMarkdown>
+          <ReactMarkdown remarkPlugins={[RemarkBreaks]} className="text-sm">
+            {item.content}
+          </ReactMarkdown>
         )}
       </div>
       {item.embed && (
         <div
           className={clsx(
-            'rounded bg-neutral-800 p-4 border-l-4 flex flex-col gap-2',
+            'rounded bg-neutral-800 p-4 border-l-4 flex flex-col gap-2 md:max-w-[600px]',
             item.embed.color === 16711680 && 'border-red-600',
             item.embed.color === 0 && 'border-black'
           )}
         >
           <div>{item.embed.title}</div>
-          <ReactMarkdown className="text-xs">
+          <ReactMarkdown className="text-xs" remarkPlugins={[RemarkBreaks]}>
             {item.embed.description}
           </ReactMarkdown>
         </div>
       )}
-      {item.url && <img className="w-full md:w-96 rounded-md" src={item.url} />}
+      {item.url && (
+        <Image
+          rootClassName="w-full md:w-96 rounded-md overflow-hidden"
+          src={item.url}
+        />
+      )}
       {!!item.components?.length && (
         <div className="flex flex-col self-start justify-self-start">
           {item.components.map((v, i) => (
@@ -48,16 +60,19 @@ export default function MsgItem({ item }: { item: MjMessage }) {
                   key={ci}
                   data-style={cv.style}
                   onClick={() => {
+                    ctx?.setJobLoading(true)
                     ins?.api.action(
                       item.id,
                       cv.custom_id,
                       item.flags!,
-                      handleMsg
+                      (type, msg) => handleMsg(type, msg, ctx?.handJobMsg)
                     )
                   }}
                 >
-                  <span className="mr-1">{cv.emoji?.name}</span>
-                  <span>{cv.label}</span>
+                  {cv.emoji?.name && (
+                    <span className="mr-1">{cv.emoji?.name}</span>
+                  )}
+                  {cv.label && <span>{cv.label}</span>}
                 </button>
               ))}
             </div>
