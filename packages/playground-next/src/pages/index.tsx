@@ -87,19 +87,14 @@ export default function Home() {
               destroyOnClose
               onCancel={() => setOpenRemixModal(false)}
               onOk={() => {
-                formRef.current?.validateFields().then((value) => {
+                formRef.current?.validateFields().then(({ prompt }) => {
                   ctx?.setJobLoading(true)
+                  let components = remixSubmitInfo.components
+                  components.at(0)!.components.at(0).value = prompt
                   ins?.api.remixSubmit(
                     remixSubmitInfo.id,
                     remixSubmitInfo.custom_id,
-                    Object.assign(remixSubmitInfo.components, {
-                      0: {
-                        ...remixSubmitInfo.components[0],
-                        component: [
-                          { ...remixSubmitInfo.components[0].components, value }
-                        ]
-                      }
-                    }),
+                    components,
                     (type, msg) => handleMsg(type, msg, ctx?.handJobMsg)
                   )
                   setOpenRemixModal(false)
