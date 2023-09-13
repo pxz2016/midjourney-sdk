@@ -145,7 +145,8 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
       type === 'MESSAGE_CREATE' ||
       type === 'MESSAGE_UPDATE' ||
       type === 'MESSAGE_DELETE' ||
-      type === 'INTERACTION_IFRAME_MODAL_CREATE'
+      type === 'INTERACTION_IFRAME_MODAL_CREATE' ||
+      type === 'INTERACTION_MODAL_CREATE'
     ) {
       this.handleMessage(type, data)
     }
@@ -157,7 +158,11 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
 
   private handleMessage(type: MjMsgType, message: MjOriginMessage) {
     if (message.channel_id !== this.opts.channel_id) return
-    if (type === 'MESSAGE_CREATE' || type === 'INTERACTION_IFRAME_MODAL_CREATE')
+    if (
+      type === 'MESSAGE_CREATE' ||
+      type === 'INTERACTION_IFRAME_MODAL_CREATE' ||
+      type === 'INTERACTION_MODAL_CREATE'
+    )
       this.handleMessageCreate(type, message)
     else if (type === 'MESSAGE_UPDATE')
       this.handleMessageUpdate('MESSAGE_UPDATE', message)
@@ -171,7 +176,8 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
       embeds = [],
       custom_id,
       content,
-      attachments = []
+      attachments = [],
+      components
     } = message
     nonce = nonce || matchRegionNonce(content)
     if (nonce && !attachments.length) {
@@ -187,12 +193,12 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
         }
       }
       if (type === 'INTERACTION_IFRAME_MODAL_CREATE' && custom_id) {
-        const varyRegionCustomId = custom_id.split('::')[2]
+        custom_id = custom_id.split('::')[2]
         let varyRegionPrompt = ''
         // you need to configure the frontend proxy if you in the browser environment, you can see the proxy detail in `packages/playground/vite.config.ts` file.
         return this.opts
           .fetch(
-            `${this.opts.discordsaysUrl}/inpaint/api/get-image-info/0/0/${varyRegionCustomId}`
+            `${this.opts.discordsaysUrl}/inpaint/api/get-image-info/0/0/${custom_id}`
           )
           .then(async (res) => {
             if (res.ok) {
@@ -216,12 +222,23 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
                     })
                 )
               this.emitNonce(nonce!, type, {
-                varyRegionCustomId,
+                custom_id,
                 varyRegionPrompt,
                 varyRegionImgBase64: varyRegionImgBase64 as string
               })
             }
           })
+      }
+      if (
+        type === 'INTERACTION_MODAL_CREATE' &&
+        custom_id &&
+        components.length
+      ) {
+        this.emitNonce(nonce, type, {
+          id,
+          custom_id,
+          components
+        })
       }
     }
     this.handleMessageUpdate('MESSAGE_CREATE', message)
@@ -377,7 +394,10 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
           final && this.off(nonce) && s(final)
           return
         }
-        if (type === 'INTERACTION_IFRAME_MODAL_CREATE') {
+        if (
+          type === 'INTERACTION_IFRAME_MODAL_CREATE' ||
+          type === 'INTERACTION_MODAL_CREATE'
+        ) {
           this.off(nonce)
           return
         }

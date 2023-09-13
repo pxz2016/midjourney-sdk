@@ -29,11 +29,11 @@ export default function MjModal({
         <Transition.Child
           as={Fragment}
           enter="duration-300 ease-out"
-          enter-from="opacity-0"
-          enter-to="opacity-100"
+          enterFrom="opacity-0"
+          enterTo="opacity-100"
           leave="duration-200 ease-in"
-          leave-from="opacity-100"
-          leave-to="opacity-0"
+          leaveFrom="opacity-100"
+          leaveTo="opacity-0"
         >
           <div className="fixed inset-0 bg-gray-600/60" />
         </Transition.Child>
@@ -47,11 +47,11 @@ export default function MjModal({
             <Transition.Child
               as={Fragment}
               enter="duration-300 ease-out"
-              enter-from="opacity-0 scale-95"
-              enter-to="opacity-100 scale-100"
+              enterFrom="opacity-0 scale-95"
+              enterTo="opacity-100 scale-100"
               leave="duration-200 ease-in"
-              leave-from="opacity-100 scale-100"
-              leave-to="opacity-0 scale-95"
+              leaveFrom="opacity-100 scale-100"
+              leaveTo="opacity-0 scale-95"
             >
               <Dialog.Panel
                 className={clsx(

@@ -1,4 +1,4 @@
-import MjForm from '@/components/mj-form'
+import { MjLoginForm, MjRemixForm } from '@/components/mj-form'
 import Welcome from '@/components/welcome'
 import { useMjStore } from '@/stores/mj'
 import Footer from '@/components/footer'
@@ -6,28 +6,36 @@ import MsgItem from '@/components/msg-item'
 import MjModal from '@/components/mj-modal'
 import InpaintingEditor from '@/components/inpainting-editor'
 import { MessageContent } from '@/content/message'
-import { useContext } from 'react'
-import { Spin } from 'antd'
+import { useContext, useRef } from 'react'
+import { Spin, Modal, FormInstance } from 'antd'
 import { useHydrated } from '@/hooks'
+import { ce } from '@/utils/paper'
 
 export default function Home() {
   const [
     ins,
     mapping,
     openVaryRegion,
+    openRemixModal,
     setOpenVaryRegion,
+    setOpenRemixModal,
     varyRegionInfo,
+    remixSubmitInfo,
     handleMsg
   ] = useMjStore((state) => [
     state.ins,
     state.mapping,
     state.openVaryRegion,
+    state.openRemixModal,
     state.setOpenVaryRegion,
+    state.setOpenRemixModal,
     state.varyRegionInfo,
+    state.remixSubmitInfo,
     state.handleMsg
   ])
   const ctx = useContext(MessageContent)
   const hy = useHydrated()
+  const formRef = useRef<FormInstance>(null)
   const handleSubmit = (mask: string, prompt: string) => {
     if (ins && varyRegionInfo.varyRegionCustomId && mask && prompt) {
       ctx?.setJobLoading(true)
@@ -38,6 +46,7 @@ export default function Home() {
         (type, msg) => handleMsg(type, msg, ctx?.handJobMsg)
       )
       setOpenVaryRegion(false)
+      ;(ce as any).clear()
     }
   }
   return (
@@ -53,7 +62,7 @@ export default function Home() {
           <>
             <Welcome />
             {!ins?.initialize ? (
-              <MjForm />
+              <MjLoginForm />
             ) : (
               <>
                 <div className="flex flex-col gap-4">
@@ -72,6 +81,33 @@ export default function Home() {
             >
               <InpaintingEditor submit={handleSubmit} />
             </MjModal>
+            <Modal
+              title="Remix Prompt"
+              open={openRemixModal}
+              destroyOnClose
+              onCancel={() => setOpenRemixModal(false)}
+              onOk={() => {
+                formRef.current?.validateFields().then((value) => {
+                  ctx?.setJobLoading(true)
+                  ins?.api.remixSubmit(
+                    remixSubmitInfo.id,
+                    remixSubmitInfo.custom_id,
+                    Object.assign(remixSubmitInfo.components, {
+                      0: {
+                        ...remixSubmitInfo.components[0],
+                        component: [
+                          { ...remixSubmitInfo.components[0].components, value }
+                        ]
+                      }
+                    }),
+                    (type, msg) => handleMsg(type, msg, ctx?.handJobMsg)
+                  )
+                  setOpenRemixModal(false)
+                })
+              }}
+            >
+              <MjRemixForm ref={formRef} />
+            </Modal>
           </>
         )}
       </div>

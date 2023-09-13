@@ -1,10 +1,10 @@
 import { MidJourneyOptions, defaultOpts } from 'midjourney-sdk'
-import { useContext, useState } from 'react'
+import { forwardRef, useContext, useState } from 'react'
 import { useMjStore } from '@/stores/mj'
-import { Button, Form, Input } from 'antd'
+import { Button, Form, FormInstance, Input } from 'antd'
 import { MessageContent } from '@/content/message'
 
-export default function MjForm() {
+export const MjLoginForm = () => {
   const init = useMjStore((state) => state.init)
   const [loading, setLoading] = useState(false)
   const ctx = useContext(MessageContent)
@@ -77,3 +77,32 @@ export default function MjForm() {
     </Form>
   )
 }
+
+export const MjRemixForm = forwardRef<FormInstance>(({}, formRef) => {
+  const components = useMjStore((state) => state.remixSubmitInfo.components)
+  return (
+    <Form
+      layout="vertical"
+      ref={formRef}
+      initialValues={{ prompt: components.at(0)?.components.at(0).value }}
+    >
+      <Form.Item
+        label="NEW PROMPT FOR IMAGE"
+        name="prompt"
+        rules={[
+          {
+            required: true,
+            message: 'Please enter the image prompt!'
+          }
+        ]}
+      >
+        <Input.TextArea
+          placeholder="enter a new prompt"
+          rows={5}
+          showCount
+          maxLength={4000}
+        ></Input.TextArea>
+      </Form.Item>
+    </Form>
+  )
+})

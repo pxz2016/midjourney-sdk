@@ -70,7 +70,7 @@ export interface MjOriginMessage {
   heartbeat_interval?: number
   session_id?: string
   user?: any
-  // Vary (Region)
+  // Vary (Region) or Remix mode
   custom_id?: string
 }
 
@@ -86,8 +86,8 @@ export interface MjMessage {
   originId?: string
   parentId?: string
   timestamp?: string
+  custom_id?: string
   // Vary (Region)
-  varyRegionCustomId?: string
   varyRegionImgBase64?: string
   varyRegionPrompt?: string
   // other...
@@ -115,3 +115,4 @@ export type MjMsgType =
   | 'INTERACTION_CREATE'
   | 'INTERACTION_SUCCESS'
   | 'INTERACTION_IFRAME_MODAL_CREATE'
+  | 'INTERACTION_MODAL_CREATE'

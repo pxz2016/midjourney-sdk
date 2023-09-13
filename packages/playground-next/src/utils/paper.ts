@@ -1,5 +1,5 @@
 import paper from 'paper'
-const ce = new paper.PaperScope()
+export const ce = new paper.PaperScope()
 
 type PaperToolEvent = paper.ToolEvent & { event: MouseEvent | TouchEvent }
 

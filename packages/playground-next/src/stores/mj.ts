@@ -2,7 +2,8 @@ import {
   MidJourney,
   MidJourneyOptions,
   MjMessage,
-  MjMsgType
+  MjMsgType,
+  MjOriginMessage
 } from 'midjourney-sdk'
 import { create } from 'zustand'
 
@@ -14,12 +15,19 @@ export interface IMjStore {
     varyRegionCustomId: string
     varyRegionPrompt: string
   }
+  remixSubmitInfo: {
+    id: string
+    custom_id: string
+    components: MjOriginMessage['components']
+  }
   openVaryRegion: boolean
+  openRemixModal: boolean
   init: (opt: MidJourneyOptions) => Promise<void>
   updateMapping: (
     updater: (mapping: Record<MjMessage['id'], MjMessage>) => void
   ) => void
   setOpenVaryRegion: (openVaryRegion: boolean) => void
+  setOpenRemixModal: (openRemixModal: boolean) => void
   handleMsg: (
     type: MjMsgType,
     msg: MjMessage,
@@ -31,16 +39,25 @@ export const useMjStore = create<IMjStore>((set, get) => ({
   ins: null,
   mapping: {},
   varyRegionInfo: {
-    varyRegionImgBase64: '',
+    varyRegionImgBase64: './0_0.webp',
     varyRegionCustomId: '',
     varyRegionPrompt: ''
   },
+  remixSubmitInfo: {
+    id: '',
+    custom_id: '',
+    components: []
+  },
   openVaryRegion: false,
+  openRemixModal: false,
   async init(opts) {
     return new MidJourney(opts).init().then((ins) => set(() => ({ ins })))
   },
   setOpenVaryRegion(openVaryRegion) {
     set({ openVaryRegion })
+  },
+  setOpenRemixModal(openRemixModal) {
+    set({ openRemixModal })
   },
   updateMapping(updater) {
     const mapping = get().mapping
@@ -60,15 +77,28 @@ export const useMjStore = create<IMjStore>((set, get) => ({
     } else if (
       type === 'INTERACTION_IFRAME_MODAL_CREATE' &&
       msg.varyRegionImgBase64 &&
-      msg.varyRegionCustomId &&
+      msg.custom_id &&
       msg.varyRegionPrompt
     ) {
       set({
         openVaryRegion: true,
         varyRegionInfo: {
-          varyRegionCustomId: msg.varyRegionCustomId,
+          varyRegionCustomId: msg.custom_id,
           varyRegionImgBase64: msg.varyRegionImgBase64,
           varyRegionPrompt: msg.varyRegionPrompt
+        }
+      })
+    } else if (
+      type === 'INTERACTION_MODAL_CREATE' &&
+      msg.custom_id &&
+      msg.components?.length
+    ) {
+      set({
+        openRemixModal: true,
+        remixSubmitInfo: {
+          id: msg.id,
+          components: msg.components,
+          custom_id: msg.custom_id
         }
       })
     } else {
