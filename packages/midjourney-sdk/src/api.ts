@@ -1,5 +1,9 @@
 import { MidjourneyCommand } from './command'
-import { MessageCallBack, MidJourneyFullOptions } from './types'
+import {
+  MessageCallBack,
+  MidJourneyFullOptions,
+  MjOriginMessage
+} from './types'
 import { nextNonce } from './utils'
 
 export class MidjourneyApi extends MidjourneyCommand {
@@ -117,6 +121,26 @@ export class MidjourneyApi extends MidjourneyCommand {
         nonce: payload.nonce,
         cb,
         parentId: message_id
+      })
+    ]).then(([_, res]) => res)
+  }
+
+  remixSubmit(
+    id: string,
+    custom_id: string,
+    components: MjOriginMessage['components'],
+    cb?: MessageCallBack
+  ) {
+    const payload = this.getPayload(5, {
+      id,
+      custom_id,
+      components
+    })
+    return Promise.all([
+      this.interactions(payload, cb),
+      this.opts.ws?.waitMessage({
+        nonce: payload.nonce,
+        cb
       })
     ]).then(([_, res]) => res)
   }

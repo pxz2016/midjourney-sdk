@@ -71,6 +71,8 @@ export const useMjStore = create<IMjStore>((set, get) => ({
           varyRegionPrompt: msg.varyRegionPrompt
         }
       })
+    } else if (type === 'INTERACTION_CREATE') {
+      console.log(msg)
     } else {
       get().updateMapping((mapping) => {
         mapping[msg.id] = msg
