@@ -193,12 +193,12 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
         }
       }
       if (type === 'INTERACTION_IFRAME_MODAL_CREATE' && custom_id) {
-        const varyRegionCustomId = custom_id.split('::')[2]
+        custom_id = custom_id.split('::')[2]
         let varyRegionPrompt = ''
         // you need to configure the frontend proxy if you in the browser environment, you can see the proxy detail in `packages/playground/vite.config.ts` file.
         return this.opts
           .fetch(
-            `${this.opts.discordsaysUrl}/inpaint/api/get-image-info/0/0/${varyRegionCustomId}`
+            `${this.opts.discordsaysUrl}/inpaint/api/get-image-info/0/0/${custom_id}`
           )
           .then(async (res) => {
             if (res.ok) {
@@ -222,7 +222,7 @@ export class MidjourneyWs extends EventEmitter<MjEvents> {
                     })
                 )
               this.emitNonce(nonce!, type, {
-                varyRegionCustomId,
+                custom_id,
                 varyRegionPrompt,
                 varyRegionImgBase64: varyRegionImgBase64 as string
               })

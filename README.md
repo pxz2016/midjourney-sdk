@@ -8,10 +8,11 @@ _It's useful for you, please give me open source power、support and star✨ thi
 
 [Live demo](https://midjourney-sdk-playground-next.vercel.app)
 
-![](docs/WechatIMG493.jpg)
-![](docs/241131694080315_.pic.jpg)
-![](docs/WX20230910-140608@2x.png)
-![](docs/WX20230910-140737@2x.png)
+![](assets/2671694615683.png)
+![](assets/241131694080315_.png)
+![](assets/WX20230910-140608@2x.png)
+![](assets/WX20230910-140737@2x.png)
+![](assets/2661694615634.png)
 
 ## Support
 
@@ -27,6 +28,7 @@ _It's useful for you, please give me open source power、support and star✨ thi
   - [x] `reroll`
   - [x] `zoomout`
   - [x] `vary(Region)`
+- Remix Mode
 
 ## Install
 
@@ -46,9 +48,11 @@ const ins = new MidJourney({
 })
 ;(async () => {
   await ins.init()
+  // trigger image job
   const msg1 = await ins.api.imagine('apple --q 5', ({ url, progress }) => {
     console(url, progress)
   })
+  // trigger button job
   const msg2 = await ins.api.action(
     'msgId',
     'customId',
@@ -57,7 +61,17 @@ const ins = new MidJourney({
       console(url, progress)
     }
   )
-  const msg3 = await ins.api.varyRegion(
+  // trigger remix job
+  const msg3 = await ins.api.remixSubmit(
+    'modalMsgId',
+    'customId',
+    'components',
+    ({ url, progress }) => {
+      console(url, progress)
+    }
+  )
+  // trigger vary(region) job
+  const msg4 = await ins.api.varyRegion(
     'customId',
     'prompt',
     'mask',
@@ -73,16 +87,16 @@ const ins = new MidJourney({
 - edit environment `.env` file
 
 ```
-# packages/playground/.env
-VITE_TOKEN=
-VITE_GUILD_ID=
-VITE_CHANNEL_ID=
+# packages/playground-next/.env
+NEXT_PUBLIC_TOKEN=
+NEXT_PUBLIC_GUILD_ID=
+NEXT_PUBLIC_CHANNEL_ID=
 # discord api proxy url
-VITE_API_BASE_URL=
-# discord image proxy url
-VITE_IMG_BASE_URL=
+NEXT_PUBLIC_API_BASE_URL=
 # discord websocket proxy url
-VITE_WS_BASE_URL=
+NEXT_PUBLIC_IMG_BASE_URL=
+# discord websocket proxy url
+NEXT_PUBLIC_WS_BASE_URL=
 ```
 
 - run `dev` script
@@ -91,7 +105,7 @@ VITE_WS_BASE_URL=
 pnpm dev
 ```
 
-- open `http://localhost:5173/midjourney-sdk`
+- open `http://localhost:3000`
 
 # Proxy
 

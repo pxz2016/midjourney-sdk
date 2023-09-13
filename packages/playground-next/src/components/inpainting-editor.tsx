@@ -15,6 +15,7 @@ export default function InpaintingEditor({
   submit: (mask: string, prompt: string) => void
 }) {
   const [paper, setPaper] = useState<MjPaper | null>(null)
+  const [selectedTool, setTool] = useState<0 | 0.5>(0)
   const canvas = useRef<HTMLCanvasElement>(null)
   const varyRegionInfo = useMjStore((state) => state.varyRegionInfo)
   const [input, setInput] = useState(varyRegionInfo.varyRegionPrompt)
@@ -83,13 +84,14 @@ export default function InpaintingEditor({
               key={i}
               className={clsx(
                 'editor-btn',
-                paper?.selectedTool === v.value && '!bg-gray-400'
+                selectedTool === v.value && '!bg-gray-400'
               )}
               onClick={() => {
                 paper &&
                   setPaper((paper) =>
                     Object.assign(paper!, { selectedTool: v.value })
                   )
+                setTool(v.value)
               }}
             >
               <v.icon className="w-5 h-5" />
