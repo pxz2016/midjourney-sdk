@@ -1,4 +1,4 @@
-import { MjPaper } from '@/utils/paper'
+import { MjPaper, ce } from '@/utils/paper'
 import TextareaAutosize from 'react-textarea-autosize'
 import Undo from '@/icons/undo.svg'
 import Send from '@/icons/send.svg'
@@ -50,6 +50,7 @@ export default function InpaintingEditor({
   }
   useEffect(() => {
     init()
+    return () => (ce as any).clear()
   }, [])
   return (
     <>

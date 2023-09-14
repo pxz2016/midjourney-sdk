@@ -39,7 +39,7 @@ export const useMjStore = create<IMjStore>((set, get) => ({
   ins: null,
   mapping: {},
   varyRegionInfo: {
-    varyRegionImgBase64: './0_0.webp',
+    varyRegionImgBase64: '',
     varyRegionCustomId: '',
     varyRegionPrompt: ''
   },
