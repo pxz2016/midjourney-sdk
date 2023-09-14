@@ -9,7 +9,6 @@ import { MessageContent } from '@/content/message'
 import { useContext, useRef } from 'react'
 import { Spin, Modal, FormInstance } from 'antd'
 import { useHydrated } from '@/hooks'
-import { ce } from '@/utils/paper'
 
 export default function Home() {
   const [
@@ -46,7 +45,6 @@ export default function Home() {
         (type, msg) => handleMsg(type, msg, ctx?.handJobMsg)
       )
       setOpenVaryRegion(false)
-      ;(ce as any).clear()
     }
   }
   return (
